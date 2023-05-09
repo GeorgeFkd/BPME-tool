@@ -1,0 +1,12 @@
+version: "3"
+services:
+  backend:
+    build: ./bpme-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - frontend
+  frontend:
+    build: ./bpme-frontend
+    ports:
+      - "3000:3000"

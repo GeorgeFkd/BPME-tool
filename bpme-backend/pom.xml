@@ -48,7 +48,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>2.5.7</version>
 				<configuration>
+				<mainClass>com.example.bpme.BpmeApplication</mainClass>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
@@ -56,6 +58,7 @@
 						</exclude>
 					</excludes>
 				</configuration>
+				
 			</plugin>
 		</plugins>
 	</build>
