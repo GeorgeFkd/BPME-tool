@@ -1,5 +1,6 @@
 package com.example.bpme;
 
+import com.example.bpme.records.MetricResults;
 import com.example.bpme.records.MetricResultsOfFile;
 import org.springframework.core.io.Resource;
 

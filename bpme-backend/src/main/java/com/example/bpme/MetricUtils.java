@@ -39,12 +39,126 @@ public class MetricUtils {
     private static final String BPMN_INCOMING = "incoming";
     private static final String BPMN_OUTGOING = "outgoing";
     private static final String BPMN_SEQUENCE_FLOW = "sequenceFlow";
+
+    private ArrayList<BPMetric> metrics = new ArrayList<>();
+
+    public ArrayList<BPMetric> getMetrics() {
+        return metrics;
+    }
     DocumentBuilder domBuilder;
     XPath xpathObj;
     public MetricUtils() throws ParserConfigurationException {
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         this.domBuilder = builderFactory.newDocumentBuilder();
         this.xpathObj = XPathFactory.newInstance().newXPath();
+
+        MetricUtils metricUtils = this;
+        this.metrics.add(new BPMetric("CFC","",0,-1) {
+            @Override
+            public Number calculateMetric(String xmlString) {
+                return metricUtils.CFC(xmlString,-1);
+            }
+        });
+
+        this.metrics.add(new BPMetric("AGD","",0,-1) {
+            @Override
+            public Number calculateMetric(String xmlString) {
+                return metricUtils.AGD(xmlString,-1);
+            }
+        });
+        this.metrics.add(new BPMetric("NSFG","",0,-1) {
+            @Override
+            public Number calculateMetric(String xmlString) {
+                return metricUtils.NSFG(xmlString,-1);
+            }
+        });
+
+        this.metrics.add(new BPMetric("NOA","",0,-1) {
+            @Override
+            public Number calculateMetric(String xmlString) {
+                return metricUtils.NOA(xmlString,-1);
+            }
+        });
+
+        this.metrics.add(new BPMetric("NOAJS","",0,-1) {
+            @Override
+            public Number calculateMetric(String xmlString) {
+                return metricUtils.NOAJS(xmlString,-1);
+            }
+        });
+
+        this.metrics.add(new BPMetric("DENSITY","",0,-1) {
+            @Override
+            public Number calculateMetric(String xmlString) {
+                return metricUtils.DENSITY(xmlString,-1);
+            }
+        });
+
+        this.metrics.add(new BPMetric("CNC","",0,-1) {
+            @Override
+            public Number calculateMetric(String xmlString) {
+                return metricUtils.CNC(xmlString,-1);
+            }
+        });
+
+        this.metrics.add(new BPMetric("GH","",0,-1) {
+            @Override
+            public Number calculateMetric(String xmlString) {
+                return metricUtils.GH(xmlString,-1);
+            }
+        });
+
+        this.metrics.add(new BPMetric("MGD","",0,-1) {
+            @Override
+            public Number calculateMetric(String xmlString) {
+                return metricUtils.MGD(xmlString,-1);
+            }
+        });
+
+        this.metrics.add(new BPMetric("CLA","",0,-1) {
+            @Override
+            public Number calculateMetric(String xmlString) {
+                return metricUtils.CLA(xmlString,-1);
+            }
+        });
+
+        this.metrics.add(new BPMetric("TNG","",0,-1) {
+            @Override
+            public Number calculateMetric(String xmlString) {
+                return metricUtils.TNG(xmlString,-1);
+            }
+        });
+
+        this.metrics.add(new BPMetric("TS","",0,-1) {
+            @Override
+            public Number calculateMetric(String xmlString) {
+                return metricUtils.TS(xmlString,-1);
+            }
+        });
+
+        this.metrics.add(new BPMetric("NSFE","",0,-1) {
+            @Override
+            public Number calculateMetric(String xmlString) {
+                return metricUtils.NSFE(xmlString,-1);
+            }
+        });
+
+        this.metrics.add(new BPMetric("NSFA","",0,-1) {
+            @Override
+            public Number calculateMetric(String xmlString) {
+                return metricUtils.NSFA(xmlString,-1);
+            }
+        });
+
+        this.metrics.add(new BPMetric("GM","",0,-1) {
+            @Override
+            public Number calculateMetric(String xmlString) {
+                return metricUtils.GM(xmlString,-1);
+            }
+        });
+
+
+
     }
 
 
@@ -195,7 +309,7 @@ public class MetricUtils {
     }
 
 
-    public double CNC(String xmlString,double ErrValue){
+    public  double CNC(String xmlString,double ErrValue){
         Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
         int arcs = getAllSequenceFlows(xmlString).orElseThrow().getLength();
         int events = getEventsInDiagram(xmlString).orElseThrow().size();
@@ -207,11 +321,11 @@ public class MetricUtils {
 
     }
 
-    public int sequenceFlowsInDiagram(String xmlString,int ErrValue){
+    public  int sequenceFlowsInDiagram(String xmlString,int ErrValue){
         return getAllSequenceFlows(xmlString).orElseThrow().getLength();
     }
 
-    public double DENSITY(String xmlString,double ErrValue){
+    public  double DENSITY(String xmlString,double ErrValue){
         Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
         int arcs = getAllSequenceFlows(xmlString).orElseThrow().getLength();
         int events = getEventsInDiagram(xmlString).orElseThrow().size();
@@ -342,7 +456,7 @@ public class MetricUtils {
         }
     }
 
-    public int NOAJS(String xmlString,int ErrValue){
+    public  int NOAJS(String xmlString,int ErrValue){
         Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
         return NOA(xmlString,0) + TNG(xmlString,0);
 
@@ -392,58 +506,8 @@ public class MetricUtils {
             }
         }
         return sum;
-//        for(int i = 0; i < activitiesInDiagram.size()-1; i++){
-//            for(int j = i + 1; j< activitiesInDiagram.size();j++){
-//
-//                Node activity1 = activitiesInDiagram.get(i);
-//                Node activity2 = activitiesInDiagram.get(j);
-//                try {
-//                    NodeList childNodesOfFirst = (NodeList) xpathObj.compile("./*").evaluate(activity1,XPathConstants.NODESET);
-//                    NodeList childNodesOfSecond = (NodeList) xpathObj.compile("./*").evaluate(activity2,XPathConstants.NODESET);
-//
-//                    ArrayList<Node> outgoingOfFirst = getNodesWithLocalNameThatPassesPredicate(childNodesOfFirst,(elemName)->elemName.equals("outgoing"));
-//                    ArrayList<Node> outgoingOfSecond = getNodesWithLocalNameThatPassesPredicate(childNodesOfSecond,(elemName)->elemName.equals("outgoing"));
-//
-//                    ArrayList<Node> incomingOfFirst = getNodesWithLocalNameThatPassesPredicate(childNodesOfFirst,(elemName)->elemName.equals("incoming"));
-//                    ArrayList<Node> incomingOfSecond = getNodesWithLocalNameThatPassesPredicate(childNodesOfSecond,(elemName)->elemName.equals("incoming"));
-//
-//
-//
-//                    if(outgoingOfFirst.size() != 0 && incomingOfSecond.size() !=0 ){
-//                        for(Node outgoing: outgoingOfFirst){
-//                            for(Node incoming: incomingOfSecond){
-//                                if(outgoing.getTextContent().equals(incoming.getTextContent())){
-//                                    sum += 1;
-//                                    System.out.println(outgoing.getNodeName());
-//
-//                                }
-//                            }
-//                        }
-//                    }
-//                    if(incomingOfFirst.size() != 0 && outgoingOfSecond.size() !=0 ){
-//                        for(Node outgoing: outgoingOfSecond){
-//                            for(Node incoming: incomingOfSecond){
-//                                if(outgoing.getTextContent().equals(incoming.getTextContent())){
-//                                    sum += 1;
-//                                    System.out.println(outgoing.getTextContent());
-//                                }
-//                            }
-//                        }
-//                    }
-//
-//
-//                } catch (XPathExpressionException e) {
-//                    System.out.println("ERROR IN NSFA: " + e.getCause() + "--" + e.getMessage());
-//                    return ErrValue;
-//
-//                }
-//
-//            }
-//        }
-//        return sum;
-
     }
-    public int NSFE(String xmlString,int ErrValue){
+    public  int NSFE(String xmlString,int ErrValue){
         Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
         ArrayList<Node> activitiesInDiagram = getAllActivitiesOfCompleteModel(xmlString).orElseThrow();
         System.out.println("How many activities in diagram: " + activitiesInDiagram.size());
@@ -488,7 +552,7 @@ public class MetricUtils {
         //ENDS-WITH IS NOT VALID IN XPATH
         return getGatewaysInDiagram(xmlString).orElseThrow().size();
     }
-    public int TS(String xmlString){
+    public int TS(String xmlString,int ErrValue){
         return -1;
     }
 

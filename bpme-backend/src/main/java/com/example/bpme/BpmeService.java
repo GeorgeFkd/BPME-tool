@@ -1,7 +1,12 @@
 package com.example.bpme;
 
+import com.example.bpme.records.MetricResults;
+import com.example.bpme.records.MetricResultsOfFile;
+import com.example.bpme.records.StatisticalResults;
+import com.example.bpme.records.StatisticalResultsOfMetric;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -27,10 +32,13 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 @Service
-public class BpmeService {
+@Component("BpmeService")
+public class BpmeService implements CalculateMetricsService, CalculateMetricStatisticsService{
 
+    private MetricUtils metricUtils = new MetricUtils();
 
-
+    public BpmeService() throws ParserConfigurationException {
+    }
 
 
     public ArrayList<HashMap<String, Number>> ParseXmlFiles(List<Resource> fileList) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
@@ -75,5 +83,50 @@ public class BpmeService {
         return hashMaps;
 
 
+    }
+
+
+    @Override
+    public ArrayList<StatisticalResultsOfMetric> calculateStatisticsForMetricValues(ArrayList<MetricResultsOfFile> metricResults) {
+        ArrayList<StatisticalResultsOfMetric> statisticalResultsOfMetrics = new ArrayList<>();
+        for(String metricName:MetricUtils.supportedMetrics ){
+            ArrayList<Number> metricValues = metricResults.stream().filter(metricResult -> metricResult.metricName().equals(metricName)).map(metricResult -> metricResult.result()).collect(Collectors.toCollection(ArrayList::new));
+            double mean = metricValues.stream().mapToDouble(Number::doubleValue).average().orElse(Double.NaN);
+            double variance = metricValues.stream().mapToDouble(Number::doubleValue).map(d -> Math.pow(d - mean, 2)).average().orElse(Double.NaN);
+            double standardDeviation = Math.sqrt(variance);
+            double median = metricValues.stream().mapToDouble(Number::doubleValue).sorted().skip(metricValues.size() / 2).findFirst().orElse(Double.NaN);
+            double min = metricValues.stream().mapToDouble(Number::doubleValue).min().orElse(Double.NaN);
+            double max = metricValues.stream().mapToDouble(Number::doubleValue).max().orElse(Double.NaN);
+            statisticalResultsOfMetrics.add(new StatisticalResultsOfMetric(metricName,new StatisticalResults(mean,variance,standardDeviation,median,min,max)));
+        }
+        return statisticalResultsOfMetrics;
+    }
+
+    public ArrayList<MetricResults> calculateMetricsForFile(Resource fileResource){
+        ArrayList<MetricResults> metricResults = new ArrayList<>();
+        try {
+            String fileContent = fileResource.getContentAsString(Charset.defaultCharset());
+            for(BPMetric metric:this.metricUtils.getMetrics()){
+                metricResults.add(new MetricResults(metric.getName(),metric.calculateMetric(fileContent)));
+            }
+            return metricResults;
+        } catch (IOException e) {
+            return metricResults;
+        }
+
+    }
+
+
+
+
+
+
+    public ArrayList<MetricResultsOfFile> calculateMetricsForFiles(List<Resource> fileList)  {
+        ArrayList<MetricResultsOfFile> metricResultsOfFiles = new ArrayList<>();
+        for(Resource file:fileList){
+            ArrayList<MetricResults> metricResults = calculateMetricsForFile(file);
+            metricResultsOfFiles.add(new MetricResultsOfFile(file.getFilename(),metricResults));
+        }
+        return metricResultsOfFiles;
     }
 }
