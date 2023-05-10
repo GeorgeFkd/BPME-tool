@@ -4,9 +4,13 @@ services:
     build: ./bpme-backend
     ports:
       - "8080:8080"
+    volumes:
+    - /bpme-backend:/app
     depends_on:
       - frontend
   frontend:
     build: ./bpme-frontend
     ports:
-      - "3000:3000"
+      - "5173:5173"
+    volumes:
+      - /bpme-frontend:/app

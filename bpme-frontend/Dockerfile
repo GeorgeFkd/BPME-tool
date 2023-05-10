@@ -1,7 +1,7 @@
-FROM node:18-ubuntu:latest
-WORKDIR /app
+FROM node:18-alpine
+WORKDIR /usr/app
 COPY package*.json ./
 RUN npm install
 COPY . .
-CMD ["npm", "run" , "dev"]
-EXPOSE 3000
+CMD ["npm", "run" , "dev" , "--", "--host"]
+EXPOSE 5173

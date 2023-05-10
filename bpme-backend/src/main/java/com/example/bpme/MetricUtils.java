@@ -8,6 +8,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.print.DocFlavor;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -17,15 +18,27 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class MetricUtils {
+
+    public static final ArrayList<String> supportedMetrics = new ArrayList<>(
+            Arrays.asList("CFC","AGD","NSFG","NOA","NOAJS","DENSITY","CNC","GH","MGD",
+                    "CLA","TNG","TS","NSFE","NSFA","GM")
+    );
+
+    private static final String BPMN_XOR = "exclusiveGateway";
+    private static final String BPMN_AND = "parallelGateway";
+    private static final String BPMN_START = "startEvent";
+    private static final String BPMN_END = "endEvent";
+    private static final String BPMN_OR = "inclusiveGateway";
+    private static final String BPMN_EVENT_BASED = "eventBasedGateway";
+    private static final String BPMN_INCOMING = "incoming";
+    private static final String BPMN_OUTGOING = "outgoing";
+    private static final String BPMN_SEQUENCE_FLOW = "sequenceFlow";
     DocumentBuilder domBuilder;
     XPath xpathObj;
     public MetricUtils() throws ParserConfigurationException {
