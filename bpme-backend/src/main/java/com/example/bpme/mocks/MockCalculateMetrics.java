@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 @Component("MockCalculateMetrics")
 public class MockCalculateMetrics implements CalculateMetricsService {
-    @Override
-    public ArrayList<MetricResultsOfFile> calculateMetricsForFiles(List<Resource> fileList) {
+
+    public ArrayList<MetricResultsOfFile> calculateMetricsForFiles(List<Resource> fileList,ArrayList<String> metricsChosen) {
         ArrayList<MetricResultsOfFile> totalResults = new ArrayList<>();
         for(Resource file : fileList){
             ArrayList<MetricResults> metricResults = new ArrayList<>();
@@ -26,4 +26,6 @@ public class MockCalculateMetrics implements CalculateMetricsService {
 
         return totalResults;
     }
+
+
 }

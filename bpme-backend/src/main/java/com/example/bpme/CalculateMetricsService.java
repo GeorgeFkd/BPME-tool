@@ -1,5 +1,6 @@
 package com.example.bpme;
 
+import com.example.bpme.records.MetricResults;
 import com.example.bpme.records.MetricResultsOfFile;
 import org.springframework.core.io.Resource;
 
@@ -8,6 +9,6 @@ import java.util.List;
 
 public interface CalculateMetricsService {
 
-    public ArrayList<MetricResultsOfFile> calculateMetricsForFiles(List<Resource> fileList);
+    public List<MetricResultsOfFile> calculateMetricsForFiles(List<Resource> fileList,ArrayList<String> metricsChosen);
 
 }
