@@ -31,11 +31,11 @@ public class BpmeController {
 
 
     @PostMapping(path ="/files")
-    public ResponseEntity<AnalysisResults> analyzeFiles(@RequestParam("files") MultipartFile[] filesArray) {
-        List<Resource> resourceList = Arrays.stream(filesArray).map((f) -> f.getResource()).collect(Collectors.toList());
-        ArrayList<MetricResultsOfFile> metricResults = this.calculateMetricsApi.calculateMetricsForFiles(resourceList);
+    public ResponseEntity<AnalysisResults> analyzeFiles(@RequestParam("files") MultipartFile[] filesArray,@RequestParam("metrics") ArrayList<String> metricsToInclude) {
+        List<Resource> resourceList = Arrays.stream(filesArray).map(MultipartFile::getResource).collect(Collectors.toList());
+        List<MetricResultsOfFile> metricResults = this.calculateMetricsApi.calculateMetricsForFiles(resourceList,metricsToInclude);
 
-        ArrayList<StatisticalResultsOfMetric> statisticalResultsOfMetrics = this.calculateMetricStatisticsApi.calculateStatisticsForMetricValues(metricResults);
+        List<StatisticalResultsOfMetric> statisticalResultsOfMetrics = this.calculateMetricStatisticsApi.calculateStatisticsForMetricValues(metricResults,metricsToInclude);
         AnalysisResults analysisResults = new AnalysisResults(metricResults,statisticalResultsOfMetrics);
 
         return new ResponseEntity<>(analysisResults,HttpStatus.OK);

@@ -424,7 +424,11 @@ public class MetricUtils {
         }
         //pairnw to megisto
         System.out.println(gatewaysDegrees);
-        return gatewaysDegrees.stream().max((num1,num2)-> num1 - num2).orElseThrow();
+        Optional<Integer> res = gatewaysDegrees.stream().max((num1,num2)-> num1 - num2);
+        if(res.isPresent())
+            return res.get();
+
+        return 0;
 
 
     }
@@ -599,8 +603,14 @@ public class MetricUtils {
                 Node current = nodeList.item(i);
 
                 if(current.getNodeType() == Node.ELEMENT_NODE){
-                    String localName = current.getNodeName().split(":")[1];
-                    if(localName.endsWith("Gateway")) gatewayNodes.add(current);
+                    String[] localName = current.getNodeName().split(":");
+                    if(localName.length < 2){
+                        if(localName[0].endsWith("Gateway")) gatewayNodes.add(current);
+                    }else {
+                        if(localName[1].endsWith("Gateway")) gatewayNodes.add(current);
+                    }
+
+
                 }
             }
             return Optional.of(gatewayNodes);
@@ -618,17 +628,13 @@ public class MetricUtils {
             Node current = nodeList.item(i);
             if(current.getNodeType() == Node.ELEMENT_NODE){
                 //System.out.println("NODE: " + current.getNodeName() + "LOCAL: " + current.getLocalName());
-                String localName = current.getNodeName().split(":")[1];
-                if(predicate.test(localName)) nodesThatMatchPredicate.add(current);
-//                if(current.getLocalName() != null){
-//                    System.out.println("ELEM LOCAL NAME: " + current.getLocalName());
-//                    if(predicate.test(current.getLocalName())) {
-//
-//                        nodesThatMatchPredicate.add(current);
-//                    }
-//
-//                }
-                // System.out.println(current.getLocalName());
+                String[] localName = current.getNodeName().split(":");
+
+                if(localName.length < 2){
+                    if(predicate.test(localName[0])) nodesThatMatchPredicate.add(current);
+                }else {
+                    if(predicate.test(localName[1])) nodesThatMatchPredicate.add(current);
+                }
             }
         }
         return nodesThatMatchPredicate;

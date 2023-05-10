@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface CalculateMetricsService {
 
-    public ArrayList<MetricResultsOfFile> calculateMetricsForFiles(List<Resource> fileList);
+    public List<MetricResultsOfFile> calculateMetricsForFiles(List<Resource> fileList,ArrayList<String> metricsChosen);
 
 }
