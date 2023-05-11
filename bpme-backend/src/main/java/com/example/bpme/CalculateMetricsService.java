@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface CalculateMetricsService {
 
-    public List<MetricResultsOfFile> calculateMetricsForFiles(List<Resource> fileList,ArrayList<String> metricsChosen);
+    public List<MetricResultsOfFile> calculateMetricsForFiles(List<Resource> fileList,ArrayList<String> metricsChosen) throws InterruptedException;
 
 }

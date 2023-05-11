@@ -8,6 +8,7 @@ import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -93,7 +94,6 @@ public class BpmeService implements CalculateMetricsService, CalculateMetricStat
         for (String metricName : metricsToInclude) {
             //get metric values from MetricResultsOfFile
             List<Number> metricValues = mResults.stream().filter(m -> m.metricName().equals(metricName)).map(m -> m.result()).toList();
-            System.out.println("FLATTENED IT: " + mResults);
             double mean = metricValues.stream().mapToDouble(Number::doubleValue).average().orElse(Double.NaN);
             double variance = metricValues.stream().mapToDouble(Number::doubleValue).map(d -> Math.pow(d - mean, 2)).average().orElse(Double.NaN);
             double standardDeviation = Math.sqrt(variance);
@@ -107,29 +107,6 @@ public class BpmeService implements CalculateMetricsService, CalculateMetricStat
         return statisticalResultsOfMetrics;
     }
 
-//    public ArrayList<MetricResults> calculateMetricsForFile(Resource fileResource){
-//        ArrayList<MetricResults> metricResults = new ArrayList<>();
-//        try {
-//            String fileContent = fileResource.getContentAsString(Charset.defaultCharset());
-//            for(BPMetric metric:this.metricUtils.getMetrics()){
-//                metricResults.add(new MetricResults(metric.getName(),metric.calculateMetric(fileContent)));
-//            }
-//            return metricResults;
-//        } catch (IOException e) {
-//            return metricResults;
-//        }
-//
-//    }
-
-
-//    public ArrayList<MetricResultsOfFile> calculateAllMetricsForFiles(List<Resource> fileList) {
-//        ArrayList<MetricResultsOfFile> metricResultsOfFiles = new ArrayList<>();
-//        for (Resource file : fileList) {
-//            ArrayList<MetricResults> metricResults = calculateMetricsForFile(file);
-//            metricResultsOfFiles.add(new MetricResultsOfFile(file.getFilename(), metricResults));
-//        }
-//        return metricResultsOfFiles;
-//    }
 
     @Override
     public List<MetricResultsOfFile> calculateMetricsForFiles(List<Resource> fileList, ArrayList<String> metricsChosen) {
@@ -137,6 +114,8 @@ public class BpmeService implements CalculateMetricsService, CalculateMetricStat
         List<BPMetric> metricsToCalculate = this.metricUtils.getMetrics().stream().filter(m -> metricsChosen.contains(m.getName())).toList();
         for (Resource f : fileList) {
             try {
+                System.out.println("==================");
+                System.out.println("FILENAME: " + f.getFilename());
                 String fileContent = f.getContentAsString(Charset.defaultCharset());
                 ArrayList<MetricResults> metricResultsOfCurrentFile = new ArrayList<>();
                 for (BPMetric metric : metricsToCalculate) {
