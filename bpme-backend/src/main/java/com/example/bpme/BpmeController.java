@@ -31,11 +31,12 @@ public class BpmeController {
 
 
     @PostMapping(path ="/files")
-    public ResponseEntity<AnalysisResults> analyzeFiles(@RequestParam("files") MultipartFile[] filesArray) {
-        List<Resource> resourceList = Arrays.stream(filesArray).map((f) -> f.getResource()).collect(Collectors.toList());
-        ArrayList<MetricResultsOfFile> metricResults = this.calculateMetricsApi.calculateMetricsForFiles(resourceList);
+    public ResponseEntity<AnalysisResults> analyzeFiles(@RequestParam("files") MultipartFile[] filesArray,@RequestParam("metrics") ArrayList<String> metricsToInclude) throws InterruptedException {
+        List<Resource> resourceList = Arrays.stream(filesArray).map(MultipartFile::getResource).collect(Collectors.toList());
 
-        ArrayList<StatisticalResultsOfMetric> statisticalResultsOfMetrics = this.calculateMetricStatisticsApi.calculateStatisticsForMetricValues(metricResults);
+        List<MetricResultsOfFile> metricResults = this.calculateMetricsApi.calculateMetricsForFiles(resourceList,metricsToInclude);
+
+        List<StatisticalResultsOfMetric> statisticalResultsOfMetrics = this.calculateMetricStatisticsApi.calculateStatisticsForMetricValues(metricResults,metricsToInclude);
         AnalysisResults analysisResults = new AnalysisResults(metricResults,statisticalResultsOfMetrics);
 
         return new ResponseEntity<>(analysisResults,HttpStatus.OK);

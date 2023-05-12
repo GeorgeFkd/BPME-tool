@@ -9,11 +9,13 @@ import com.example.bpme.records.StatisticalResultsOfMetric;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Component("MockCalculateMetricStatistics")
 public class MockCalculateMetricStatistics implements CalculateMetricStatisticsService {
 
-    public ArrayList<StatisticalResultsOfMetric> calculateStatisticsForMetricValues(ArrayList<MetricResults> metricResults) {
+    @Override
+    public List<StatisticalResultsOfMetric> calculateStatisticsForMetricValues(List<MetricResultsOfFile> metricResults, ArrayList<String> metricsChosen) {
         ArrayList<StatisticalResultsOfMetric> statisticalResults = new ArrayList<>();
 
         for(String metric: MetricUtils.supportedMetrics){

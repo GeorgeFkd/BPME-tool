@@ -175,9 +175,7 @@ public class MetricUtils {
             String expression = "./*";
             try {
                 NodeList nodeList = (NodeList) xpathObj.compile(expression).evaluate(gateway,XPathConstants.NODESET);
-                System.out.println("IN AGD: " + nodeList.getLength());
                 ArrayList<Node> nodes = getNodesWithLocalNameThatPassesPredicate(nodeList,(elemName)->elemName.equals("incoming") || elemName.equals("outgoing"));
-                System.out.println("IN ARRLIST " + nodes.size());
 
                 return nodes.size();
             } catch (XPathExpressionException e) {
@@ -198,10 +196,10 @@ public class MetricUtils {
         String andGatewayTagName = "parallelGateway";
         String eventBasedGatewayTagName = "eventBasedGateway";
         ArrayList<Node> gateways = getGatewaysInDiagram(xmlString).orElseThrow();
-        List<Node> xorGateways = gateways.stream().filter((node-> node.getNodeName().split(":")[1].equals(xorGatewayTagName))).collect(Collectors.toList());
-        List<Node> andGateways = gateways.stream().filter((node-> node.getNodeName().split(":")[1].equals(andGatewayTagName))).collect(Collectors.toList());
-        List<Node> orGateways = gateways.stream().filter((node-> node.getNodeName().split(":")[1].equals(orGatewayTagName))).collect(Collectors.toList());
-        List<Node> eventGateways = gateways.stream().filter((node-> node.getNodeName().split(":")[1].equals(eventBasedGatewayTagName))).collect(Collectors.toList());
+        List<Node> xorGateways = gateways.stream().filter((node-> getLocalNameFromXmlNodeName(node.getNodeName()).equals(xorGatewayTagName))).collect(Collectors.toList());
+        List<Node> andGateways = gateways.stream().filter((node-> getLocalNameFromXmlNodeName(node.getNodeName()).equals(andGatewayTagName))).collect(Collectors.toList());
+        List<Node> orGateways = gateways.stream().filter((node-> getLocalNameFromXmlNodeName(node.getNodeName()).equals(orGatewayTagName))).collect(Collectors.toList());
+        List<Node> eventGateways = gateways.stream().filter((node-> getLocalNameFromXmlNodeName(node.getNodeName()).equals(eventBasedGatewayTagName))).collect(Collectors.toList());
 
 
         int cfcXor = xorGateways.stream().reduce(0,(total,gatewayNode)->{
@@ -315,7 +313,6 @@ public class MetricUtils {
         int events = getEventsInDiagram(xmlString).orElseThrow().size();
         int nodes = NOA(xmlString,0) + TNG(xmlString,0) + events;
         if(nodes == 0) return ErrValue;
-        System.out.println("Arcs = " + arcs + " Nodes= " + nodes);
 
         return arcs/(double) nodes;
 
@@ -331,7 +328,6 @@ public class MetricUtils {
         int events = getEventsInDiagram(xmlString).orElseThrow().size();
         int nodes = NOA(xmlString,0) + TNG(xmlString,0) + events;
         if(nodes == 0) return ErrValue;
-        System.out.println("Arcs = " + arcs + " Nodes= " + nodes);
         int divWith = nodes * (nodes-1);
         return arcs/(double) divWith;
     }
@@ -342,7 +338,7 @@ public class MetricUtils {
             if(numberOfGatewaysInDiagram == 0 ) return ErrValue;
             HashMap<String,Integer> countGatewaysPerType = new HashMap<>();
             for(Node n: gateways){
-                String typeOfGateway = n.getNodeName().split(":")[1];
+                String typeOfGateway = getLocalNameFromXmlNodeName(n.getNodeName());
                 int prevValue = countGatewaysPerType.getOrDefault(typeOfGateway,0);
                 countGatewaysPerType.put(typeOfGateway,prevValue + 1);
             }
@@ -359,7 +355,6 @@ public class MetricUtils {
         String orGatewayTagName = "inclusiveGateway";
         String andGatewayTagName = "parallelGateway";
         String eventBasedGatewayTagName = "eventBasedGateway";
-        System.out.println("WELCOME TO GM");
         String[] gatewayTypes= {xorGatewayTagName,orGatewayTagName,andGatewayTagName,eventBasedGatewayTagName};
         NodeList allNodes = null;
         int totalGM = 0;
@@ -370,7 +365,7 @@ public class MetricUtils {
         ArrayList<Node> gatewaysOfDiagram = getGatewaysInDiagram(xmlString).orElseThrow();
         for(String gateType: gatewayTypes){
 
-            List<Node> gatewaysOfType = gatewaysOfDiagram.stream().filter((node) -> node.getNodeName().split(":")[1].equals(gateType)).collect(Collectors.toList());
+            List<Node> gatewaysOfType = gatewaysOfDiagram.stream().filter((node) -> getLocalNameFromXmlNodeName(node.getNodeName()).equals(gateType)).collect(Collectors.toList());
             System.out.println(gatewaysOfType.size());
             int gmOfType = gatewaysOfType.stream().reduce(0,(total,node)-> {
                 NodeList childrenOfGateway = null;
@@ -381,7 +376,6 @@ public class MetricUtils {
                 }
                 int incoming = getNodesWithLocalNameThatPassesPredicate(childrenOfGateway, (elemName) -> elemName.equals("incoming")).size();
                 int outgoing = getNodesWithLocalNameThatPassesPredicate(childrenOfGateway, (elemName) -> elemName.equals("outgoing")).size();
-                System.out.println("Found this--> " + incoming +"  " +outgoing +"<----");
                 if (incoming > outgoing) {
                     //merge node
                     return total - incoming;
@@ -392,7 +386,6 @@ public class MetricUtils {
                 }
             },Integer::sum);
 
-            System.out.println("FOUND RESULT: " + gmOfType + "-----" + gateType );
             totalGM += Math.abs(gmOfType);
         }
         } catch (XPathExpressionException e) {
@@ -414,7 +407,6 @@ public class MetricUtils {
             String expressionForChildren = "./*";
             try {
                 NodeList children = (NodeList) xpathObj.compile(expressionForChildren).evaluate(n,XPathConstants.NODESET);
-                System.out.println("HELOOOOO---->" + children.getLength());
                 int flowsOfNode = getNodesWithLocalNameThatPassesPredicate(children,(elemName)-> elemName.equals("incoming") || elemName.equals("outgoing")).size();
                 gatewaysDegrees.add(gateways.indexOf(n),flowsOfNode);
             } catch (XPathExpressionException e) {
@@ -424,7 +416,11 @@ public class MetricUtils {
         }
         //pairnw to megisto
         System.out.println(gatewaysDegrees);
-        return gatewaysDegrees.stream().max((num1,num2)-> num1 - num2).orElseThrow();
+        Optional<Integer> res = gatewaysDegrees.stream().max((num1,num2)-> num1 - num2);
+        if(res.isPresent())
+            return res.get();
+
+        return 0;
 
 
     }
@@ -447,7 +443,6 @@ public class MetricUtils {
         String expression = ".//*";
         try {
             NodeList totalNodeList = (NodeList) xpathObj.compile(expression).evaluate(xmlDoc, XPathConstants.NODESET);
-            System.out.println("NOA WORKING WITH this many nodes: " + totalNodeList.getLength());
             ArrayList<Node> activitiesNodeList = getNodesWithLocalNameThatPassesPredicate(totalNodeList,(elemName)->elemName.matches(".*(t|T)ask"));
             return activitiesNodeList.size();
         } catch (XPathExpressionException e) {
@@ -467,7 +462,6 @@ public class MetricUtils {
         try {
             NodeList allNodes = (NodeList) xpathObj.compile(".//*").evaluate(xmlDoc,XPathConstants.NODESET);
             ArrayList<Node> allActivities = getNodesWithLocalNameThatPassesPredicate(allNodes,(localName)->localName.matches(".*(t|T)ask"));
-            System.out.println("All activities are:" + allActivities);
             return Optional.of(allActivities);
         } catch (XPathExpressionException e) {
             return Optional.empty();
@@ -478,27 +472,26 @@ public class MetricUtils {
 
     public int NSFA(String xmlString,int ErrValue){
         Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
-        ArrayList<Node> activitiesInDiagram = getAllActivitiesOfCompleteModel(xmlString).orElseThrow();
-        System.out.println("How many activities in diagram: " + activitiesInDiagram.size());
         int sum = 0;
         ArrayList<Node> sequenceFlowsInDiagram = getAllSequenceFlowsArr(xmlString).orElseThrow();
         for(Node n: sequenceFlowsInDiagram){
-            String sourceRef = n.getAttributes().getNamedItem("sourceRef").getNodeValue();
-            String targetRef = n.getAttributes().getNamedItem("targetRef").getNodeValue();
-
-
-
+            String sourceRef;
+            String targetRef;
+            try{
+                sourceRef = n.getAttributes().getNamedItem("sourceRef").getNodeValue();
+                targetRef = n.getAttributes().getNamedItem("targetRef").getNodeValue();
+            }catch (NullPointerException e){
+                return -1;
+            }
             try {
                 Node sourceNode = (Node) xpathObj.compile("//*[@id='"  + sourceRef  + "']").evaluate(xmlDoc,XPathConstants.NODE);
-                String sourceNodeName = sourceNode.getNodeName().split(":")[1];
-
+                String sourceNodeName = getLocalNameFromXmlNodeName(sourceNode.getNodeName());
                 Node targetNode = (Node) xpathObj.compile("//*[@id='"  + targetRef  + "']").evaluate(xmlDoc,XPathConstants.NODE);
-                String targetNodeName = targetNode.getNodeName().split(":")[1];
-//                System.out.println("NODE NAMES: " + targetNodeName + "---" + sourceNodeName);
+                String targetNodeName = getLocalNameFromXmlNodeName(targetNode.getNodeName());
                 if(sourceNodeName.matches(".*(t|T)ask") && targetNodeName.matches(".*(t|T)ask")){
                     sum += 1;
-                    System.out.println("FROM: " + sourceRef + "TO: " + targetRef);
-                    System.out.println("N1: " + sourceNodeName + " TO: " + targetNodeName);
+//                    System.out.println("FROM: " + sourceRef + "TO: " + targetRef);
+//                    System.out.println("N1: " + sourceNodeName + " TO: " + targetNodeName);
                 }
 
             } catch (XPathExpressionException e) {
@@ -509,24 +502,35 @@ public class MetricUtils {
     }
     public  int NSFE(String xmlString,int ErrValue){
         Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
-        ArrayList<Node> activitiesInDiagram = getAllActivitiesOfCompleteModel(xmlString).orElseThrow();
-        System.out.println("How many activities in diagram: " + activitiesInDiagram.size());
         int sum = 0;
         ArrayList<Node> sequenceFlowsInDiagram = getAllSequenceFlowsArr(xmlString).orElseThrow();
         for(Node n: sequenceFlowsInDiagram){
-            String sourceRef = n.getAttributes().getNamedItem("sourceRef").getNodeValue();
+
             try {
+                String sourceRef = n.getAttributes().getNamedItem("sourceRef").getNodeValue();
                 Node sourceNode = (Node) xpathObj.compile("//*[@id='"  + sourceRef  + "']").evaluate(xmlDoc,XPathConstants.NODE);
-                String sourceNodeName = sourceNode.getNodeName().split(":")[1];
+                String sourceNodeName = getLocalNameFromXmlNodeName(sourceNode.getNodeName());
                 if(sourceNodeName.matches(".+Event$")){
                     sum += 1;
                 }
 
             } catch (XPathExpressionException e) {
                 System.out.println("Something went wrong: " + e.getCause() + "--" + e.getMessage());
+                return -1;
+            } catch (Exception e){
+                return -1;
             }
         }
         return sum;
+    }
+
+
+    private String getLocalNameFromXmlNodeName(String nodeName){
+        String[] splitLocalNameFromNamespace = nodeName.split(":");
+        if(splitLocalNameFromNamespace.length < 2 ){
+            return splitLocalNameFromNamespace[0];
+        }
+        return splitLocalNameFromNamespace[1];
     }
     public int NSFG(String xmlString,int ErrValue){
         Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
@@ -535,15 +539,20 @@ public class MetricUtils {
         int sum = 0;
         ArrayList<Node> sequenceFlowsInDiagram = getAllSequenceFlowsArr(xmlString).orElseThrow();
         for(Node n: sequenceFlowsInDiagram){
-            String sourceRef = n.getAttributes().getNamedItem("sourceRef").getNodeValue();
+
             try {
+                String sourceRef = n.getAttributes().getNamedItem("sourceRef").getNodeValue();
                 Node sourceNode = (Node) xpathObj.compile("//*[@id='"  + sourceRef  + "']").evaluate(xmlDoc,XPathConstants.NODE);
-                String sourceNodeName = sourceNode.getNodeName().split(":")[1];
+                String sourceNodeName = getLocalNameFromXmlNodeName(sourceNode.getNodeName());
                 if(sourceNodeName.matches(".+Gateway$")){
                     sum += 1;
                 }
             } catch (XPathExpressionException e) {
-                System.out.println("Something went wrong: " + e.getCause() + "--" + e.getMessage());
+                System.out.println("Something XPATH went wrong: " + e.getCause() + "--" + e.getMessage());
+                return -1;
+            } catch (Exception e){
+                System.out.println("Something went wrong " + e.getCause() + " " + e.getMessage());
+                return -1;
             }
         }
         return sum;
@@ -597,10 +606,10 @@ public class MetricUtils {
             ArrayList<Node> gatewayNodes = new ArrayList<>();
             for(int i = 0; i< nodeList.getLength(); i++){
                 Node current = nodeList.item(i);
-
                 if(current.getNodeType() == Node.ELEMENT_NODE){
-                    String localName = current.getNodeName().split(":")[1];
+                    String localName = getLocalNameFromXmlNodeName(current.getNodeName());
                     if(localName.endsWith("Gateway")) gatewayNodes.add(current);
+
                 }
             }
             return Optional.of(gatewayNodes);
@@ -617,18 +626,8 @@ public class MetricUtils {
         for(int i = 0; i< nodeList.getLength(); i++){
             Node current = nodeList.item(i);
             if(current.getNodeType() == Node.ELEMENT_NODE){
-                //System.out.println("NODE: " + current.getNodeName() + "LOCAL: " + current.getLocalName());
-                String localName = current.getNodeName().split(":")[1];
-                if(predicate.test(localName)) nodesThatMatchPredicate.add(current);
-//                if(current.getLocalName() != null){
-//                    System.out.println("ELEM LOCAL NAME: " + current.getLocalName());
-//                    if(predicate.test(current.getLocalName())) {
-//
-//                        nodesThatMatchPredicate.add(current);
-//                    }
-//
-//                }
-                // System.out.println(current.getLocalName());
+                String localName = getLocalNameFromXmlNodeName(current.getNodeName());
+                if(predicate.test(localName))nodesThatMatchPredicate.add(current);
             }
         }
         return nodesThatMatchPredicate;
