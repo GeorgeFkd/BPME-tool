@@ -4,7 +4,7 @@ const API_ROUTE = `http://localhost:${API_PORT}/api/v1/bpme/files`
 const supportedFileTypes = ["xml", "bpmn"]
 function BpmeTool() {
 
-  const handleFilesSubmitClick = (event: any) => {
+  const handleFilesSubmitClick = async (event: any) => {
 
     const target = event.target as HTMLInputElement;
     const files: FileList | null = target.files;
@@ -17,12 +17,18 @@ function BpmeTool() {
 
     const data = new FormData();
     filteredFiles.forEach((file) => data.append("files", file))
-    data.append("files", filteredFiles[0]);
+    // data.append("files", filteredFiles[0]);
+    data.append("metrics", "AGD,MGD,GH,GM")
     fetch(API_ROUTE, {
       method: "POST",
-      body: data,
+      headers: {
+        "Access-Control-Allow-Origin": "*"
+      },
+      body: data
 
-    })
+    }).then(res =>
+      res.json()
+    ).then(data => console.log(data))
 
   }
   return <div className="h-screen px-16 w-100">
