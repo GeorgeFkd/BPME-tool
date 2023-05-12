@@ -14,6 +14,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,7 +31,9 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
+import java.util.List;
+import java.util.ArrayList;
+import org.springframework.core.io.Resource;
 import static java.util.List.*;
 
 @Service
@@ -90,22 +94,17 @@ public class BpmeService implements CalculateMetricsService, CalculateMetricStat
     @Override
     public ArrayList<StatisticalResultsOfMetric> calculateStatisticsForMetricValues(List<MetricResultsOfFile> metricResults, ArrayList<String> metricsToInclude) {
         ArrayList<StatisticalResultsOfMetric> statisticalResultsOfMetrics = new ArrayList<>();
-<<<<<<< HEAD
-        for(String metricName:MetricUtils.supportedMetrics ){
-            ArrayList<Number> metricValues = metricResults.stream().filter(metricResult -> metricResult.().equals(metricName)).map(metricResult -> metricResult.result()).collect(Collectors.toCollection(ArrayList::new));
-=======
         List<MetricResults> mResults = metricResults.stream().map(MetricResultsOfFile::results).flatMap(Collection::stream).toList();
-        for (String metricName : metricsToInclude) {
+        for (String theMetric : metricsToInclude) {
             //get metric values from MetricResultsOfFile
-            List<Number> metricValues = mResults.stream().filter(m -> m.metricName().equals(metricName)).map(m -> m.result()).toList();
->>>>>>> backend
+            List<Number> metricValues = mResults.stream().filter(m -> m.metricName().equals(theMetric)).map(m -> m.result()).toList();
             double mean = metricValues.stream().mapToDouble(Number::doubleValue).average().orElse(Double.NaN);
             double variance = metricValues.stream().mapToDouble(Number::doubleValue).map(d -> Math.pow(d - mean, 2)).average().orElse(Double.NaN);
             double standardDeviation = Math.sqrt(variance);
             double median = metricValues.stream().mapToDouble(Number::doubleValue).sorted().skip(metricValues.size() / 2).findFirst().orElse(Double.NaN);
             double min = metricValues.stream().mapToDouble(Number::doubleValue).min().orElse(Double.NaN);
             double max = metricValues.stream().mapToDouble(Number::doubleValue).max().orElse(Double.NaN);
-            statisticalResultsOfMetrics.add(new StatisticalResultsOfMetric(metricName, new StatisticalResults(mean, variance, standardDeviation, median, min, max)));
+            statisticalResultsOfMetrics.add(new StatisticalResultsOfMetric(theMetric, new StatisticalResults(mean, variance, standardDeviation, median, min, max)));
 
         }
 
