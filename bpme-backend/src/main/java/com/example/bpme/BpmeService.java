@@ -90,7 +90,7 @@ public class BpmeService implements CalculateMetricsService, CalculateMetricStat
     public ArrayList<StatisticalResultsOfMetric> calculateStatisticsForMetricValues(ArrayList<MetricResultsOfFile> metricResults) {
         ArrayList<StatisticalResultsOfMetric> statisticalResultsOfMetrics = new ArrayList<>();
         for(String metricName:MetricUtils.supportedMetrics ){
-            ArrayList<Number> metricValues = metricResults.stream().filter(metricResult -> metricResult.metricName().equals(metricName)).map(metricResult -> metricResult.result()).collect(Collectors.toCollection(ArrayList::new));
+            ArrayList<Number> metricValues = metricResults.stream().filter(metricResult -> metricResult.().equals(metricName)).map(metricResult -> metricResult.result()).collect(Collectors.toCollection(ArrayList::new));
             double mean = metricValues.stream().mapToDouble(Number::doubleValue).average().orElse(Double.NaN);
             double variance = metricValues.stream().mapToDouble(Number::doubleValue).map(d -> Math.pow(d - mean, 2)).average().orElse(Double.NaN);
             double standardDeviation = Math.sqrt(variance);
