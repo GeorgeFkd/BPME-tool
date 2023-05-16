@@ -27,11 +27,18 @@ const metricsSlice = createSlice({
             state.metrics = ALL_METRICS;
         },
         removeAllMetrics: (state) => {
-            state = initialState
+            state.metrics = []
+        },
+        toggleMetric: (state, action: PayloadAction<string>) => {
+            if (state.metrics.includes(action.payload)) {
+                state.metrics = state.metrics.filter(metric => metric !== action.payload)
+            } else {
+                state.metrics.push(action.payload)
+            }
         }
 
     },
 });
 
-export const { addMetric, removeMetric, addAllMetrics, addMultipleMetrics, removeAllMetrics } = metricsSlice.actions;
+export const { addMetric, removeMetric, addAllMetrics, addMultipleMetrics, removeAllMetrics, toggleMetric } = metricsSlice.actions;
 export default metricsSlice.reducer;

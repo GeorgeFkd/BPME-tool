@@ -19,7 +19,7 @@ const filesSlice = createSlice({
             state.files = state.files.concat(action.payload)
         },
         removeAllFiles: (state) => {
-            state = initialState
+            state.files = []
         },
         removeSpecificFile: (state, action: PayloadAction<string>) => {
             state.files = state.files.filter(file => file.name !== action.payload)
