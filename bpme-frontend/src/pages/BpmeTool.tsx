@@ -7,7 +7,7 @@ import { ChevronDownIcon, MinusIcon, PlusSquareIcon } from "@chakra-ui/icons";
 import { ALL_METRICS } from "../constants/metrics";
 import { useState } from "react";
 import { useAnalyzeBpmnFilesQuery } from "../api/analysis";
-
+import { analyzeResultsAndOutputFileForUser } from "../utils/exportToExcel"
 const API_PORT = 8080;
 const API_ROUTE = `http://localhost:${API_PORT}/api/v1/bpme/files`
 const supportedFileTypes = ["xml", "bpmn"]
@@ -59,6 +59,7 @@ function BpmeTool() {
             </div>
           </div>
         </div>
+        <Button onClick={() => { analyzeResultsAndOutputFileForUser(data) }} className="bg-primary">Export to excel</Button>
       </div>
       {JSON.stringify(data)}
     </div>

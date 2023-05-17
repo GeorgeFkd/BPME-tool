@@ -3,9 +3,35 @@ import {createApi,fetchBaseQuery} from "@reduxjs/toolkit/query/react";
 const API_PORT = 8080;
 
 
-interface AnalysisResults {
-    results: any;
+export interface AnalysisResults {
+    metricResults: MetricResultsOfFile[];
+    statisticalResults: StatisticalResultsOfMetric[];
 }
+
+export interface MetricResultsOfFile{
+    filename:string;
+    results: MetricResult[];
+}
+
+export interface MetricResult{
+    metricName:string;
+    result: number;
+}
+
+export interface StatisticalResultsOfMetric{
+    metricName:string;
+    statistics: StatisticalResult;
+}
+
+export interface StatisticalResult{
+    mean: number;
+    median: number;
+    min: number;
+    max: number;
+    standardDeviation: number;
+    variance: number;
+}
+
 
 export const analysisApi = createApi({
     reducerPath: 'analysisApi',
