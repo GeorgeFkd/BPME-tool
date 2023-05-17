@@ -1,13 +1,14 @@
 export const ALL_METRICS = [
+    "TS",
+    "NOA",
+    "NSFA",
+    "NSFG",
+    "NOAJS",
+    "TNG",
+    "CLA",
     "CFC",
     "AGD",
     "MGD",
     "GH",
-    "GM",
-    "TS",
-    "DENSITY",
-    "CNC",
-    "NOA",
-    "NOAJS",
-    "TNG",
+    "GM"
 ];

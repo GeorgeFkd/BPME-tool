@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addMetric, removeMetric, addAllMetrics, removeAllMetrics, toggleMetric } from "../store/metricsSlice";
 import { addFiles, removeAllFiles, removeSpecificFile } from "../store/filesSlice";
 import { RootState } from "../store/store";
-import { Button, Menu, MenuButton, MenuItem, MenuList, Select, MenuItemOption, MenuOptionGroup, List, ListItem, ListIcon, Divider, FormControl } from "@chakra-ui/react";
+import { Button, Menu, MenuButton, MenuItem, MenuList, Select, MenuItemOption, MenuOptionGroup, List, ListItem, ListIcon, Divider, FormControl, TableContainer, Table, Thead, Tr, Th, Tbody, Td } from "@chakra-ui/react";
 import { ChevronDownIcon, MinusIcon, PlusSquareIcon } from "@chakra-ui/icons";
 import { ALL_METRICS } from "../constants/metrics";
 import { useState } from "react";
@@ -61,7 +61,88 @@ function BpmeTool() {
         </div>
         <Button onClick={() => { analyzeResultsAndOutputFileForUser(data) }} className="bg-primary">Export to excel</Button>
       </div>
-      {JSON.stringify(data)}
+      {/* i have the problem where each metric ends up in a different place */}
+      {data && <>
+        <span className="text-h3">Analysis Results</span>
+        <TableContainer>
+          <Table variant={"striped"} maxWidth={"670px"}>
+            <Thead>
+              <Tr>
+                <Th>Filename</Th>
+                {metrics.slice().sort((a, b) => {
+
+                  if (a > b) return 1
+                  if (a < b) return -1
+                  return 0
+                }
+
+                ).map((metric, index) => <Th key={metric}>{metric}</Th>)}
+              </Tr>
+            </Thead>
+            <Tbody>
+              {data.metricResults.map((res, index) => (<Tr key={res.filename}>
+                <Td>{res.filename}</Td>
+                {res.results.slice().sort((a, b) => {
+                  if (a.metricName > b.metricName) return 1
+                  if (a.metricName < b.metricName) return -1
+                  return 0
+
+
+                }).map((metricRes, index) => {
+                  return <Td key={metricRes.metricName}>{metricRes.result.toFixed(2)}</Td>
+                })}
+
+              </Tr>))
+              }
+              <Tr>
+                <Td>MIN</Td>
+                {data.statisticalResults.slice().sort((a, b) => {
+                  if (a.metricName > b.metricName) return 1
+                  if (a.metricName < b.metricName) return -1
+                  return 0
+                }).map((statRes, index) => {
+                  return <Td key={statRes.metricName}>{statRes.statistics.min.toFixed(2)}</Td>
+                })}
+              </Tr>
+
+              <Tr>
+                <Td>MAX</Td>
+                {data.statisticalResults.slice().sort((a, b) => {
+                  if (a.metricName > b.metricName) return 1
+                  if (a.metricName < b.metricName) return -1
+                  return 0
+                }).map((statRes, index) => {
+                  return <Td key={statRes.metricName}>{statRes.statistics.max.toFixed(2)}</Td>
+                })}
+              </Tr>
+
+              <Tr>
+                <Td>MEAN</Td>
+                {data.statisticalResults.slice().sort((a, b) => {
+                  if (a.metricName > b.metricName) return 1
+                  if (a.metricName < b.metricName) return -1
+                  return 0
+                }).map((statRes, index) => {
+                  return <Td key={statRes.metricName}>{statRes.statistics.mean.toFixed(2)}</Td>
+                })}
+              </Tr>
+
+              <Tr>
+                <Td>SD</Td>
+                {data.statisticalResults.slice().sort((a, b) => {
+                  if (a.metricName > b.metricName) return 1
+                  if (a.metricName < b.metricName) return -1
+                  return 0
+                }).map((statRes, index) => {
+                  return <Td key={statRes.metricName}>{statRes.statistics.standardDeviation.toFixed(2)}</Td>
+                })}
+              </Tr>
+            </Tbody>
+          </Table>
+
+
+
+        </TableContainer></>}
     </div>
   </div>;
 }
