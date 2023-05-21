@@ -6,17 +6,16 @@ import { Button, Menu, MenuButton, MenuItem, MenuList, Select, MenuItemOption, M
 import { ChevronDownIcon, MinusIcon, PlusSquareIcon } from "@chakra-ui/icons";
 import { ALL_METRICS } from "../constants/metrics";
 import { useState } from "react";
-import { useAnalyzeBpmnFilesQuery } from "../api/analysis";
+import { AnalysisResults, useAnalyzeBpmnFilesQuery } from "../api/analysis";
 import { analyzeResultsAndOutputFileForUser } from "../utils/exportToExcel"
-const API_PORT = 8080;
-const API_ROUTE = `http://localhost:${API_PORT}/api/v1/bpme/files`
+
 const supportedFileTypes = ["xml", "bpmn"]
 function BpmeTool() {
   const [skip, setSkip] = useState(true);
   const dispatch = useDispatch();
   const metrics = useSelector((state: RootState) => state.metrics.metrics)
   const files = useSelector((state: RootState) => state.files.files)
-  const { data, error, isLoading, isUninitialized } = useAnalyzeBpmnFilesQuery({ metrics, files }, { skip })
+  const { data, error, isLoading, isUninitialized, status } = useAnalyzeBpmnFilesQuery({ metrics, files }, { skip })
 
   console.log("The metrics", metrics)
   console.log("The files", files)
@@ -35,119 +34,134 @@ function BpmeTool() {
       <SubmitFilesBtn />
 
       <div className="w-100 mt-8">
-        <div className="flex w-100 justify-between">
-          <div className="flex flex-col w-1/2">
-            <span className="text-h4">Files Submitted: {files.length}</span>
+        <div className="flex flex-col lg:flex-row w-100 justify-between">
+          <div className="flex flex-col lg:w-1/2">
+            <span className="text-h5 block w-full lg:text-h4">Files Submitted: {files.length}</span>
             <SearchComponent />
             <FilesSubmittedPanel />
           </div>
           <div className="w-2 h-100 bg-slate-200"></div>
-          <div className="w-1/2">
-            <div className="flex flex-col">
+          <div className="lg:w-1/2">
+            <div className="flex flex-col mt-6 lg:mt-0">
 
 
               <MetricsMenu />
 
               <DisplaySelectedMetrics />
-              <div className="flex gap-8 pt-4 my-4 ml-8 justify-center">
+              <div className="flex flex-col md:flex-row lg:flex-row gap-8 pt-4 my-4 justify-items-center">
 
-                <button className="bg-secondary w-1/4  py-2 rounded-md" onClick={() => dispatch(removeAllMetrics())}>Select None</button>
+                <button className="bg-secondary mx-auto px-6 w-2/3 md:w-1/2 lg:w-1/4  py-2 rounded-md hover:bg-green-600" onClick={() => dispatch(removeAllMetrics())}>Select None</button>
 
-                <button className="bg-primary  w-1/4  py-2 rounded-md" onClick={() => dispatch(addAllMetrics())}>Select All</button>
+                <button className="bg-primary mx-auto w-2/3 md:w-1/2  lg:w-1/4  py-2 rounded-md text-white hover:bg-orange-500" onClick={() => dispatch(addAllMetrics())}>Select All</button>
+                <button className="bg-purple-500 mx-auto py-3 px-16 rounded-md text-white hover:bg-purple-600" onClick={handleCalculateBtn}>Calculate</button>
               </div>
-              <button className="bg-purple-500 mx-auto py-3 px-16 rounded-md" onClick={handleCalculateBtn}>Calculate</button>
+
             </div>
           </div>
         </div>
-        <Button onClick={() => { analyzeResultsAndOutputFileForUser(data) }} className="bg-primary">Export to excel</Button>
+
       </div>
       {/* i have the problem where each metric ends up in a different place */}
-      {data && <>
-        <span className="text-h3">Analysis Results</span>
-        <TableContainer>
-          <Table variant={"striped"} maxWidth={"670px"}>
-            <Thead>
-              <Tr>
-                <Th>Filename</Th>
-                {metrics.slice().sort((a, b) => {
-
-                  if (a > b) return 1
-                  if (a < b) return -1
-                  return 0
-                }
-
-                ).map((metric, index) => <Th key={metric}>{metric}</Th>)}
-              </Tr>
-            </Thead>
-            <Tbody>
-              {data.metricResults.map((res, index) => (<Tr key={res.filename}>
-                <Td>{res.filename}</Td>
-                {res.results.slice().sort((a, b) => {
-                  if (a.metricName > b.metricName) return 1
-                  if (a.metricName < b.metricName) return -1
-                  return 0
-
-
-                }).map((metricRes, index) => {
-                  return <Td key={metricRes.metricName}>{metricRes.result.toFixed(2)}</Td>
-                })}
-
-              </Tr>))
-              }
-              <Tr>
-                <Td>MIN</Td>
-                {data.statisticalResults.slice().sort((a, b) => {
-                  if (a.metricName > b.metricName) return 1
-                  if (a.metricName < b.metricName) return -1
-                  return 0
-                }).map((statRes, index) => {
-                  return <Td key={statRes.metricName}>{statRes.statistics.min.toFixed(2)}</Td>
-                })}
-              </Tr>
-
-              <Tr>
-                <Td>MAX</Td>
-                {data.statisticalResults.slice().sort((a, b) => {
-                  if (a.metricName > b.metricName) return 1
-                  if (a.metricName < b.metricName) return -1
-                  return 0
-                }).map((statRes, index) => {
-                  return <Td key={statRes.metricName}>{statRes.statistics.max.toFixed(2)}</Td>
-                })}
-              </Tr>
-
-              <Tr>
-                <Td>MEAN</Td>
-                {data.statisticalResults.slice().sort((a, b) => {
-                  if (a.metricName > b.metricName) return 1
-                  if (a.metricName < b.metricName) return -1
-                  return 0
-                }).map((statRes, index) => {
-                  return <Td key={statRes.metricName}>{statRes.statistics.mean.toFixed(2)}</Td>
-                })}
-              </Tr>
-
-              <Tr>
-                <Td>SD</Td>
-                {data.statisticalResults.slice().sort((a, b) => {
-                  if (a.metricName > b.metricName) return 1
-                  if (a.metricName < b.metricName) return -1
-                  return 0
-                }).map((statRes, index) => {
-                  return <Td key={statRes.metricName}>{statRes.statistics.standardDeviation.toFixed(2)}</Td>
-                })}
-              </Tr>
-            </Tbody>
-          </Table>
-
-
-
-        </TableContainer></>}
+      {data && <DisplayAnalysisResults data={data} />}
+      {isLoading && <Spinner />}
+      {isUninitialized && files.length > 0 && <div className="text-h3">{metrics.length === 0 && "Add metrics and "}Click Calculate to get results </div>}
     </div>
   </div>;
 }
 
+function Spinner() {
+  return <div className="text-h3">Calculating...</div>
+}
 
+
+function DisplayAnalysisResults({ data }: { data: AnalysisResults }) {
+  const metrics = useSelector((state: RootState) => state.metrics.metrics)
+  return <>
+    <div className="flex flex-row items-center md:gap-4">
+
+      <span className="text-h5 md:text-h3">Analysis Results</span>
+      <Button onClick={() => { analyzeResultsAndOutputFileForUser(data) }} className="bg-primary">Export to excel</Button>
+    </div>
+    <TableContainer>
+      <Table variant={"striped"} maxWidth={"670px"}>
+        <Thead>
+          <Tr>
+            <Th>Filename</Th>
+            {metrics.slice().sort((a, b) => {
+
+              if (a > b) return 1
+              if (a < b) return -1
+              return 0
+            }
+
+            ).map((metric, index) => <Th key={metric}>{metric}</Th>)}
+          </Tr>
+        </Thead>
+        <Tbody>
+          {data.metricResults.map((res, index) => (<Tr key={res.filename}>
+            <Td>{res.filename}</Td>
+            {res.results.slice().sort((a, b) => {
+              if (a.metricName > b.metricName) return 1
+              if (a.metricName < b.metricName) return -1
+              return 0
+
+
+            }).map((metricRes, index) => {
+              return <Td key={metricRes.metricName}>{metricRes.result.toFixed(2)}</Td>
+            })}
+
+          </Tr>))
+          }
+          <Tr>
+            <Td className="font-bold">MIN</Td>
+            {data.statisticalResults.slice().sort((a, b) => {
+              if (a.metricName > b.metricName) return 1
+              if (a.metricName < b.metricName) return -1
+              return 0
+            }).map((statRes, index) => {
+              return <Td key={statRes.metricName}>{statRes.statistics.min.toFixed(2)}</Td>
+            })}
+          </Tr>
+
+          <Tr>
+            <Td className="font-bold">MAX</Td>
+            {data.statisticalResults.slice().sort((a, b) => {
+              if (a.metricName > b.metricName) return 1
+              if (a.metricName < b.metricName) return -1
+              return 0
+            }).map((statRes, index) => {
+              return <Td key={statRes.metricName}>{statRes.statistics.max.toFixed(2)}</Td>
+            })}
+          </Tr>
+
+          <Tr>
+            <Td className="font-bold">MEAN</Td>
+            {data.statisticalResults.slice().sort((a, b) => {
+              if (a.metricName > b.metricName) return 1
+              if (a.metricName < b.metricName) return -1
+              return 0
+            }).map((statRes, index) => {
+              return <Td key={statRes.metricName}>{statRes.statistics.mean.toFixed(2)}</Td>
+            })}
+          </Tr>
+
+          <Tr>
+            <Td className="font-bold">SD</Td>
+            {data.statisticalResults.slice().sort((a, b) => {
+              if (a.metricName > b.metricName) return 1
+              if (a.metricName < b.metricName) return -1
+              return 0
+            }).map((statRes, index) => {
+              return <Td key={statRes.metricName}>{statRes.statistics.standardDeviation.toFixed(2)}</Td>
+            })}
+          </Tr>
+        </Tbody>
+      </Table>
+
+
+
+    </TableContainer></>
+}
 
 
 export default BpmeTool;
@@ -175,7 +189,7 @@ function DisplaySelectedMetrics() {
 function FilesSubmittedPanel() {
   const dispatch = useDispatch();
   const files = useSelector((state: RootState) => state.files.files)
-  return <div className="flex mt-6 h-80 w-96 flex-col bg-grey-25 scroll-auto rounded-md p-4 overflow-auto">
+  return <div className="flex w-full mt-6 lg:h-80 lg:w-96 flex-col bg-grey-25 scroll-auto rounded-md p-4 overflow-auto">
     <List spacing={4}>
 
       {files.map((file, index) => <>
@@ -206,7 +220,7 @@ function SubmitFilesBtn() {
 
 
   }
-  return <label className="w-1/5 mx-auto flex cursor-pointer hover:bg-slate-600 bg-primary invalid:bg-white valid:bg-black px-1 py-3 rounded-2xl">
+  return <label className="px-6 md:px-10 lg:px-16 mx-auto flex cursor-pointer hover:bg-slate-600 bg-primary invalid:bg-white valid:bg-black py-3 rounded-2xl">
     <input type="file" className="absolute bg-transparent" onChange={handleFilesSubmitClick} required style={{ top: "-10000px" }} multiple />
     <span className="mx-auto text-white text-h5">Submit Files</span>
   </label>
@@ -253,6 +267,6 @@ function MetricsMenu() {
 
 
 function Title() {
-  return <div className="px-16 mx-auto font text-h2 w-2/3 text-center my-6">Calculate Metrics in BPMN diagrams</div>;
+  return <div className="lg:px-16 mx-auto text-h5 md:text-h4 lg:text-h3 w-2/3 text-center my-6">Calculate Metrics in BPMN diagrams</div>;
 }
 

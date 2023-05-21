@@ -9,7 +9,7 @@ function App() {
       <Navbar />
       <hr className="bg-black-25"></hr>
       <Outlet />
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }
