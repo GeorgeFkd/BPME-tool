@@ -96,14 +96,14 @@ public class BpmeService implements CalculateMetricsService, CalculateMetricStat
         ArrayList<StatisticalResultsOfMetric> statisticalResultsOfMetrics = new ArrayList<>();
         List<MetricResults> mResults = metricResults.stream().map(MetricResultsOfFile::results).flatMap(Collection::stream).toList();
         for (String theMetric : metricsToInclude) {
-            //get metric values from MetricResultsOfFile
+            //get metric values from MetricResultsOfFile, have to filter NaN values to produce results
             List<Number> metricValues = mResults.stream().filter(m -> m.metricName().equals(theMetric)).map(m -> m.result()).toList();
-            double mean = metricValues.stream().mapToDouble(Number::doubleValue).average().orElse(Double.NaN);
-            double variance = metricValues.stream().mapToDouble(Number::doubleValue).map(d -> Math.pow(d - mean, 2)).average().orElse(Double.NaN);
+            double mean = metricValues.stream().mapToDouble(Number::doubleValue).filter(n->!Double.isNaN(n)).average().orElse(Double.NaN);
+            double variance = metricValues.stream().mapToDouble(Number::doubleValue).filter(n->!Double.isNaN(n)).map(d -> Math.pow(d - mean, 2)).average().orElse(Double.NaN);
             double standardDeviation = Math.sqrt(variance);
-            double median = metricValues.stream().mapToDouble(Number::doubleValue).sorted().skip(metricValues.size() / 2).findFirst().orElse(Double.NaN);
-            double min = metricValues.stream().mapToDouble(Number::doubleValue).min().orElse(Double.NaN);
-            double max = metricValues.stream().mapToDouble(Number::doubleValue).max().orElse(Double.NaN);
+            double median = metricValues.stream().mapToDouble(Number::doubleValue).filter(n->!Double.isNaN(n)).sorted().skip(metricValues.size() / 2).findFirst().orElse(Double.NaN);
+            double min = metricValues.stream().mapToDouble(Number::doubleValue).filter(n->!Double.isNaN(n)).min().orElse(Double.NaN);
+            double max = metricValues.stream().mapToDouble(Number::doubleValue).filter(n->!Double.isNaN(n)).max().orElse(Double.NaN);
             statisticalResultsOfMetrics.add(new StatisticalResultsOfMetric(theMetric, new StatisticalResults(mean, variance, standardDeviation, median, min, max)));
 
         }
@@ -112,25 +112,38 @@ public class BpmeService implements CalculateMetricsService, CalculateMetricStat
     }
 
 
+
+    public ArrayList<MetricResults> calculateMetricsForFile(String fileContent,List<BPMetric> metricsToCalculate){
+        ArrayList<MetricResults> metricResultsOfCurrentFile = new ArrayList<>();
+        for (BPMetric metric : metricsToCalculate) {
+            try {
+                Number result = metric.calculateMetric(fileContent);
+                metricResultsOfCurrentFile.add(new MetricResults(metric.getName(),result));
+            }catch (Exception e){
+                MetricResults result = new MetricResults(metric.getName(), Double.NaN);
+                System.out.println(result+"------");
+                metricResultsOfCurrentFile.add(result);
+            }
+        }
+        return metricResultsOfCurrentFile;
+    }
+
     @Override
     public List<MetricResultsOfFile> calculateMetricsForFiles(List<Resource> fileList, ArrayList<String> metricsChosen) {
         List<MetricResultsOfFile> resultsList = new ArrayList<>();
         List<BPMetric> metricsToCalculate = this.metricUtils.getMetrics().stream().filter(m -> metricsChosen.contains(m.getName())).toList();
         for (Resource f : fileList) {
+            String fileContent;
             try {
                 System.out.println("==================");
                 System.out.println("FILENAME: " + f.getFilename());
-                String fileContent = f.getContentAsString(Charset.defaultCharset());
-                ArrayList<MetricResults> metricResultsOfCurrentFile = new ArrayList<>();
-                for (BPMetric metric : metricsToCalculate) {
-                    metricResultsOfCurrentFile.add(new MetricResults(metric.getName(), metric.calculateMetric(fileContent)));
-                }
-
-                resultsList.add(new MetricResultsOfFile(f.getFilename(), metricResultsOfCurrentFile));
+                fileContent = f.getContentAsString(Charset.defaultCharset());
             } catch (IOException e) {
                 System.out.println("Exception " + e.getCause() + " with msg: " + e.getMessage());
                 continue;
             }
+            ArrayList<MetricResults> metricResultsOfCurrentFile = calculateMetricsForFile(fileContent,metricsToCalculate);
+            resultsList.add(new MetricResultsOfFile(f.getFilename(), metricResultsOfCurrentFile));
 
         }
         return resultsList;

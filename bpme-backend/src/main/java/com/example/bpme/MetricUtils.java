@@ -55,104 +55,104 @@ public class MetricUtils {
         MetricUtils metricUtils = this;
         this.metrics.add(new BPMetric("CFC","",0,-1) {
             @Override
-            public Number calculateMetric(String xmlString) {
+            public Number calculateMetric(String xmlString) throws IOException, SAXException {
                 return metricUtils.CFC(xmlString,-1);
             }
         });
 
         this.metrics.add(new BPMetric("AGD","",0,-1) {
             @Override
-            public Number calculateMetric(String xmlString) {
+            public Number calculateMetric(String xmlString) throws IOException, SAXException {
                 return metricUtils.AGD(xmlString,-1);
             }
         });
         this.metrics.add(new BPMetric("NSFG","",0,-1) {
             @Override
-            public Number calculateMetric(String xmlString) {
+            public Number calculateMetric(String xmlString) throws IOException, SAXException {
                 return metricUtils.NSFG(xmlString,-1);
             }
         });
 
         this.metrics.add(new BPMetric("NOA","",0,-1) {
             @Override
-            public Number calculateMetric(String xmlString) {
+            public Number calculateMetric(String xmlString) throws IOException, SAXException {
                 return metricUtils.NOA(xmlString,-1);
             }
         });
 
         this.metrics.add(new BPMetric("NOAJS","",0,-1) {
             @Override
-            public Number calculateMetric(String xmlString) {
+            public Number calculateMetric(String xmlString) throws IOException, SAXException {
                 return metricUtils.NOAJS(xmlString,-1);
             }
         });
 
         this.metrics.add(new BPMetric("DENSITY","",0,-1) {
             @Override
-            public Number calculateMetric(String xmlString) {
+            public Number calculateMetric(String xmlString) throws IOException, SAXException {
                 return metricUtils.DENSITY(xmlString,-1);
             }
         });
 
         this.metrics.add(new BPMetric("CNC","",0,-1) {
             @Override
-            public Number calculateMetric(String xmlString) {
+            public Number calculateMetric(String xmlString) throws IOException, SAXException {
                 return metricUtils.CNC(xmlString,-1);
             }
         });
 
         this.metrics.add(new BPMetric("GH","",0,-1) {
             @Override
-            public Number calculateMetric(String xmlString) {
+            public Number calculateMetric(String xmlString) throws IOException, SAXException {
                 return metricUtils.GH(xmlString,-1);
             }
         });
 
         this.metrics.add(new BPMetric("MGD","",0,-1) {
             @Override
-            public Number calculateMetric(String xmlString) {
+            public Number calculateMetric(String xmlString) throws IOException, SAXException {
                 return metricUtils.MGD(xmlString,-1);
             }
         });
 
         this.metrics.add(new BPMetric("CLA","",0,-1) {
             @Override
-            public Number calculateMetric(String xmlString) {
+            public Number calculateMetric(String xmlString) throws IOException, SAXException {
                 return metricUtils.CLA(xmlString,-1);
             }
         });
 
         this.metrics.add(new BPMetric("TNG","",0,-1) {
             @Override
-            public Number calculateMetric(String xmlString) {
+            public Number calculateMetric(String xmlString) throws IOException, SAXException {
                 return metricUtils.TNG(xmlString,-1);
             }
         });
 
         this.metrics.add(new BPMetric("TS","",0,-1) {
             @Override
-            public Number calculateMetric(String xmlString) {
+            public Number calculateMetric(String xmlString) throws IOException, SAXException {
                 return metricUtils.TS(xmlString,-1);
             }
         });
 
         this.metrics.add(new BPMetric("NSFE","",0,-1) {
             @Override
-            public Number calculateMetric(String xmlString) {
+            public Number calculateMetric(String xmlString) throws IOException, SAXException {
                 return metricUtils.NSFE(xmlString,-1);
             }
         });
 
         this.metrics.add(new BPMetric("NSFA","",0,-1) {
             @Override
-            public Number calculateMetric(String xmlString) {
+            public Number calculateMetric(String xmlString) throws IOException, SAXException {
                 return metricUtils.NSFA(xmlString,-1);
             }
         });
 
         this.metrics.add(new BPMetric("GM","",0,-1) {
             @Override
-            public Number calculateMetric(String xmlString) {
+            public Number calculateMetric(String xmlString) throws IOException, SAXException {
                 return metricUtils.GM(xmlString,-1);
             }
         });
@@ -167,7 +167,7 @@ public class MetricUtils {
         return null;
     }
 
-    public double AGD(String xmlString,double ErrValue){
+    public double AGD(String xmlString,double ErrValue) throws IOException, SAXException {
         ArrayList<Node> gateways = getGatewaysInDiagram(xmlString).orElseThrow();
 
         int sumOfFlowsFromGateways = gateways.stream().map((gateway -> {
@@ -188,7 +188,7 @@ public class MetricUtils {
         return sumOfFlowsFromGateways/gateways.size();
     }
 
-    public int CFC(String xmlString,int ErrValue){
+    public int CFC(String xmlString,int ErrValue) throws IOException, SAXException {
 //        return NOA(xmlString,0)/NSFA(xmlString,-1);
         String xorGatewayTagName = "exclusiveGateway";
         String orGatewayTagName = "inclusiveGateway";
@@ -267,8 +267,8 @@ public class MetricUtils {
         return cfcAnd + cfcOR + cfcEventBased + cfcXor;
     }
 
-    public double CLA(String xmlString,double ErrValue){
-        Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
+    public double CLA(String xmlString,double ErrValue) throws IOException, SAXException {
+        Document xmlDoc = ParseXmlStringToDocument(xmlString);
         int Noa = NOA(xmlString,-1);
         int Nsfa = NSFA(xmlString,-1);
         if(Noa == -1 || Nsfa == -1 ){ return ErrValue;}
@@ -278,10 +278,10 @@ public class MetricUtils {
 
     }
 
-    public Optional<ArrayList<Node>> getAllSequenceFlowsArr(String xmlString){
+    public Optional<ArrayList<Node>> getAllSequenceFlowsArr(String xmlString) throws IOException, SAXException {
         String sequenceFlowsExpression = "/definitions//*/*";
-        Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
         try {
+            Document xmlDoc = ParseXmlStringToDocument(xmlString);
             NodeList nodes = (NodeList) xpathObj.compile(sequenceFlowsExpression).evaluate(xmlDoc,XPathConstants.NODESET);
             return Optional.of(getNodesWithLocalNameThatPassesPredicate(nodes,(elemName)->elemName.equals("sequenceFlow")));
         } catch (XPathExpressionException e) {
@@ -294,9 +294,9 @@ public class MetricUtils {
 
 
 
-    public Optional<NodeList> getAllSequenceFlows(String xmlString){
+    public Optional<NodeList> getAllSequenceFlows(String xmlString) throws IOException, SAXException {
         String sequenceFlowsExpression = "/definitions//*/sequenceFlow";
-        Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
+        Document xmlDoc = ParseXmlStringToDocument(xmlString);
         NodeList sequenceFlowsNodeList = null;
         try {
             sequenceFlowsNodeList = (NodeList) xpathObj.compile(sequenceFlowsExpression).evaluate(xmlDoc, XPathConstants.NODESET);
@@ -309,8 +309,8 @@ public class MetricUtils {
     }
 
 
-    public  double CNC(String xmlString,double ErrValue){
-        Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
+    public  double CNC(String xmlString,double ErrValue) throws IOException, SAXException {
+        Document xmlDoc = ParseXmlStringToDocument(xmlString);
         int arcs = getAllSequenceFlows(xmlString).orElseThrow().getLength();
         int events = getEventsInDiagram(xmlString).orElseThrow().size();
         int nodes = NOA(xmlString,0) + TNG(xmlString,0) + events;
@@ -320,12 +320,12 @@ public class MetricUtils {
 
     }
 
-    public  int sequenceFlowsInDiagram(String xmlString,int ErrValue){
+    public  int sequenceFlowsInDiagram(String xmlString,int ErrValue) throws IOException, SAXException {
         return getAllSequenceFlows(xmlString).orElseThrow().getLength();
     }
 
-    public  double DENSITY(String xmlString,double ErrValue){
-        Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
+    public  double DENSITY(String xmlString,double ErrValue) throws IOException, SAXException {
+        Document xmlDoc = ParseXmlStringToDocument(xmlString);
         int arcs = getAllSequenceFlows(xmlString).orElseThrow().getLength();
         int events = getEventsInDiagram(xmlString).orElseThrow().size();
         int nodes = NOA(xmlString,0) + TNG(xmlString,0) + events;
@@ -334,7 +334,7 @@ public class MetricUtils {
         return arcs/(double) divWith;
     }
 
-    public double GH(String xmlString,double ErrValue){
+    public double GH(String xmlString,double ErrValue) throws IOException, SAXException {
             ArrayList<Node> gateways = getGatewaysInDiagram(xmlString).orElseThrow();
             int numberOfGatewaysInDiagram = gateways.size();
             if(numberOfGatewaysInDiagram == 0 ) return ErrValue;
@@ -351,8 +351,8 @@ public class MetricUtils {
             }
             return sum;
     }
-    public double GM(String xmlString,double ErrValue){
-        Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
+    public double GM(String xmlString,double ErrValue) throws IOException, SAXException {
+        Document xmlDoc = ParseXmlStringToDocument(xmlString);
         String xorGatewayTagName = "exclusiveGateway";
         String orGatewayTagName = "inclusiveGateway";
         String andGatewayTagName = "parallelGateway";
@@ -398,8 +398,8 @@ public class MetricUtils {
         return totalGM;
     }
 
-    public double MGD(String xmlString,double ErrValue){
-        Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
+    public double MGD(String xmlString,double ErrValue) throws IOException, SAXException {
+        Document xmlDoc = ParseXmlStringToDocument(xmlString);
         //thelw ola ta gateways
         ArrayList<Node> gateways = getGatewaysInDiagram(xmlString).orElseThrow();
         //meta metraw posa flows exei to kathena
@@ -427,9 +427,9 @@ public class MetricUtils {
 
     }
 
-    public int NMF(String xmlString,int ErrValue){
+    public int NMF(String xmlString,int ErrValue) throws IOException, SAXException {
         //generally a problematic metric
-        Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
+        Document xmlDoc = ParseXmlStringToDocument(xmlString);
         String expression = "//*";
         try {
             NodeList nodeList = (NodeList) xpathObj.compile(expression).evaluate(xmlDoc,XPathConstants.NODESET);
@@ -441,8 +441,8 @@ public class MetricUtils {
         }
     }
 
-    public int NOA(String xmlString,int ErrValue){
-        Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
+    public int NOA(String xmlString,int ErrValue) throws IOException, SAXException {
+        Document xmlDoc = ParseXmlStringToDocument(xmlString);
         String expression = ".//*";
         try {
             NodeList totalNodeList = (NodeList) xpathObj.compile(expression).evaluate(xmlDoc, XPathConstants.NODESET);
@@ -454,14 +454,14 @@ public class MetricUtils {
         }
     }
 
-    public  int NOAJS(String xmlString,int ErrValue){
-        Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
+    public  int NOAJS(String xmlString,int ErrValue) throws IOException, SAXException {
+        Document xmlDoc = ParseXmlStringToDocument(xmlString);
         return NOA(xmlString,0) + TNG(xmlString,0);
 
     }
 
-    public Optional<ArrayList<Node>> getAllActivitiesOfCompleteModel(String xmlString){
-        Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
+    public Optional<ArrayList<Node>> getAllActivitiesOfCompleteModel(String xmlString) throws IOException, SAXException {
+        Document xmlDoc = ParseXmlStringToDocument(xmlString);
         try {
             NodeList allNodes = (NodeList) xpathObj.compile(".//*").evaluate(xmlDoc,XPathConstants.NODESET);
             ArrayList<Node> allActivities = getNodesWithLocalNameThatPassesPredicate(allNodes,(localName)->localName.matches(".*(t|T)ask"));
@@ -473,8 +473,8 @@ public class MetricUtils {
     }
 
 
-    public int NSFA(String xmlString,int ErrValue){
-        Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
+    public int NSFA(String xmlString,int ErrValue) throws IOException, SAXException {
+        Document xmlDoc = ParseXmlStringToDocument(xmlString);
         int sum = 0;
         ArrayList<Node> sequenceFlowsInDiagram = getAllSequenceFlowsArr(xmlString).orElseThrow();
         System.out.println("Found " + sequenceFlowsInDiagram.size() + " Sequence Flows in Diagram");
@@ -505,8 +505,8 @@ public class MetricUtils {
         }
         return sum;
     }
-    public  int NSFE(String xmlString,int ErrValue){
-        Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
+    public  int NSFE(String xmlString,int ErrValue) throws IOException, SAXException {
+        Document xmlDoc = ParseXmlStringToDocument(xmlString);
         int sum = 0;
         ArrayList<Node> sequenceFlowsInDiagram = getAllSequenceFlowsArr(xmlString).orElseThrow();
         for(Node n: sequenceFlowsInDiagram){
@@ -537,8 +537,8 @@ public class MetricUtils {
         }
         return splitLocalNameFromNamespace[1];
     }
-    public int NSFG(String xmlString,int ErrValue){
-        Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
+    public int NSFG(String xmlString,int ErrValue) throws IOException, SAXException {
+        Document xmlDoc = ParseXmlStringToDocument(xmlString);
         ArrayList<Node> activitiesInDiagram = getAllActivitiesOfCompleteModel(xmlString).orElseThrow();
         System.out.println("How many activities in diagram: " + activitiesInDiagram.size());
         int sum = 0;
@@ -562,10 +562,10 @@ public class MetricUtils {
         }
         return sum;
     }
-    public int TNG(String xmlString,int ErrValue){
+    public int TNG(String xmlString,int ErrValue) throws IOException, SAXException {
         return getGatewaysInDiagram(xmlString).orElseThrow().size();
     }
-    public int TS(String xmlString,int ErrValue){
+    public int TS(String xmlString,int ErrValue) throws IOException, SAXException {
         //pairnoume ta OR,AND split nodes kai kathe fora pairnoume ta branches -1
         ArrayList<Node> gateways = getGatewaysInDiagram(xmlString).orElseThrow();
         List<Node> onlyOR_ANDGateways = gateways.stream()
@@ -578,23 +578,22 @@ public class MetricUtils {
     }
 
 
-    private Optional<Document> ParseXmlStringToDocument(String xmlString){
+    private Document ParseXmlStringToDocument(String xmlString) throws SAXException {
 
-        try {
-            Document xmlDoc = domBuilder.parse(new InputSource(new StringReader(xmlString)));
-            return Optional.of(xmlDoc);
-        } catch (SAXException e) {
-            System.out.println("Sax Exception");
 
-            return Optional.empty();
-        } catch (IOException e) {
-            System.out.println("IO exception");
-            return Optional.empty();
-        }
+//            if(xmlString.isEmpty())throw new XmlFileException.EmptyFileException();
+            InputSource inputSource = new InputSource(new StringReader(xmlString));
+            try{
+                return domBuilder.parse(inputSource);
+            } catch (IOException e){
+                System.out.println("HELLO");
+                System.out.println(e + e.getMessage() + e.getCause());
+            }
+        return null;
     }
 
-    private Optional<ArrayList<Node>> getEventsInDiagram(String xmlString){
-        Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
+    private Optional<ArrayList<Node>> getEventsInDiagram(String xmlString) throws IOException, SAXException {
+        Document xmlDoc = ParseXmlStringToDocument(xmlString);
         String expression = ".//*";
         try {
             NodeList nodeList = (NodeList) xpathObj.compile(expression).evaluate(xmlDoc,XPathConstants.NODESET);
@@ -607,8 +606,8 @@ public class MetricUtils {
         }
     }
 
-    private Optional<ArrayList<Node>> getGatewaysInDiagram(String xmlString){
-        Document xmlDoc = ParseXmlStringToDocument(xmlString).orElseThrow();
+    private Optional<ArrayList<Node>> getGatewaysInDiagram(String xmlString) throws IOException, SAXException {
+        Document xmlDoc = ParseXmlStringToDocument(xmlString);
         String expression = "/definitions//*";
         try {
             NodeList nodeList = (NodeList) xpathObj.compile(expression).evaluate(xmlDoc,XPathConstants.NODESET);
