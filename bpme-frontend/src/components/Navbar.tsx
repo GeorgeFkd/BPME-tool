@@ -4,7 +4,7 @@ import { Heading1, Heading6 } from "./Headings";
 
 function Navbar() {
   return (
-    <section className="px-16 flex flex-row gap-8 py-4">
+    <section className="px-16 flex flex-row gap-8 py-4 items-center">
       <span className="text-black">Logo</span>
       <NavLink to="/">
         <Heading6 lightVariant={true}>Home</Heading6>
