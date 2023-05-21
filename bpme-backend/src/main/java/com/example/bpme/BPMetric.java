@@ -6,14 +6,15 @@ import lombok.Getter;
 @Getter
 public abstract class BPMetric {
 
-    private String name;
-    private String description;
+    private final String name;
+    private final String description;
 
-    private Number nullValue;
-    private Number errValue;
+    private final Number nullValue;
+    private final Number errValue;
     private Number result;
 
-    public abstract Number calculateMetric(String xmlString);
+
+    public abstract Number calculateMetric(String xmlString) throws Exception;
     public BPMetric(String name, String description, Number nullValue, Number errValue){
         this.name = name;
         this.description = description;
