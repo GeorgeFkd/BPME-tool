@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addMetric, removeMetric, addAllMetrics, removeAllMetrics, toggleMetric } from "../store/metricsSlice";
 import { addFiles, removeAllFiles, removeSpecificFile } from "../store/filesSlice";
 import { RootState } from "../store/store";
-import { Button, Menu, MenuButton, MenuItem, MenuList, Select, MenuItemOption, MenuOptionGroup, List, ListItem, ListIcon, Divider, FormControl, TableContainer, Table, Thead, Tr, Th, Tbody, Td } from "@chakra-ui/react";
+import { Button, Menu, MenuButton, MenuItem, MenuList, Select, MenuItemOption, MenuOptionGroup, List, ListItem, ListIcon, Divider, FormControl, TableContainer, Table, Thead, Tr, Th, Tbody, Td, useBreakpointValue } from "@chakra-ui/react";
 import { ChevronDownIcon, MinusIcon, PlusSquareIcon } from "@chakra-ui/icons";
 import { ALL_METRICS } from "../constants/metrics";
 import { useState } from "react";
@@ -50,10 +50,10 @@ function BpmeTool() {
               <DisplaySelectedMetrics />
               <div className="flex flex-col md:flex-row lg:flex-row gap-8 pt-4 my-4 justify-items-center">
 
-                <button className="bg-secondary mx-auto px-6 w-2/3 md:w-1/2 lg:w-1/4  py-2 rounded-md hover:bg-green-600" onClick={() => dispatch(removeAllMetrics())}>Select None</button>
+                <Button className="mx-auto px-6 w-2/3 md:w-1/2 lg:w-1/4  py-2 rounded-md" bgColor={"brand.primary"} textColor={"white"} _hover={{ backgroundColor: "brand.primary-accent" }} onClick={() => dispatch(addAllMetrics())}>Select All</Button>
+                <Button className="mx-auto px-6 w-2/3 md:w-1/2 lg:w-1/4  py-2 rounded-md" bgColor="brand.secondary" textColor="brand.black" _hover={{ backgroundColor: "brand.secondary-accent" }} onClick={() => dispatch(removeAllMetrics())}>Select None</Button>
+                <Button className="mx-auto px-6 w-2/3 md:w-1/2 lg:w-1/4  py-2 rounded-md" bgColor={"purple.500"} textColor={"white"} _hover={{ backgroundColor: "purple.600" }} onClick={handleCalculateBtn} isLoading={isLoading}>Calculate</Button>
 
-                <button className="bg-primary mx-auto w-2/3 md:w-1/2  lg:w-1/4  py-2 rounded-md text-white hover:bg-orange-500" onClick={() => dispatch(addAllMetrics())}>Select All</button>
-                <button className="bg-purple-500 mx-auto py-3 px-16 rounded-md text-white hover:bg-purple-600" onClick={handleCalculateBtn}>Calculate</button>
               </div>
 
             </div>
@@ -76,10 +76,11 @@ function Spinner() {
 
 function DisplayAnalysisResults({ data }: { data: AnalysisResults }) {
   const metrics = useSelector((state: RootState) => state.metrics.metrics)
+  const textForTableTitle = useBreakpointValue({ base: "Results", md: "Analysis Results" })
   return <>
-    <div className="flex flex-row items-center md:gap-4">
+    <div className="flex flex-row items-center gap-2 md:gap-4">
 
-      <span className="text-h5 md:text-h3">Analysis Results</span>
+      <span className="text-h5 md:text-h3">{textForTableTitle}</span>
       <Button onClick={() => { analyzeResultsAndOutputFileForUser(data) }} className="bg-primary">Export to excel</Button>
     </div>
     <TableContainer>
@@ -189,7 +190,8 @@ function DisplaySelectedMetrics() {
 function FilesSubmittedPanel() {
   const dispatch = useDispatch();
   const files = useSelector((state: RootState) => state.files.files)
-  return <div className="flex w-full mt-6 lg:h-80 lg:w-96 flex-col bg-grey-25 scroll-auto rounded-md p-4 overflow-auto">
+  return <div className="flex w-full mt-6 h-56 lg:h-80 lg:w-96 flex-col bg-grey-25 scroll-auto rounded-md p-4 overflow-auto">
+    {files.length === 0 && <div className="text-h5">Submit your files</div>}
     <List spacing={4}>
 
       {files.map((file, index) => <>
@@ -249,7 +251,7 @@ function MetricsMenu() {
     (<>
 
 
-      <MenuButton as={Button} rightIcon={<ChevronDownIcon />} className="text-h4 text-center mx-auto">
+      <MenuButton as={Button} _hover={{ backgroundColor: "gray.100" }} background={"transparent"} borderColor={"brand.black"} borderWidth={"2px"} rightIcon={<ChevronDownIcon />} className="text-h4 text-center mx-auto">
         Select Metrics
       </MenuButton>
       <MenuList>

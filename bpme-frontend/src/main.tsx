@@ -18,11 +18,12 @@ import Contact from "./pages/Contact";
 import BpmeTool from "./pages/BpmeTool";
 import Home from "./pages/Home";
 import { ChakraProvider } from '@chakra-ui/react'
+import theme from "./theme/theme"
 //mallon kati me children tha kanoyme edw gia na exoume navbar kai footer
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <ChakraProvider>
+    <ChakraProvider theme={theme}>
       <Provider store={store}>
         <BrowserRouter>
           <Routes>
