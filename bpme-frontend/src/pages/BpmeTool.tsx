@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addMetric, removeMetric, addAllMetrics, removeAllMetrics, toggleMetric } from "../store/metricsSlice";
 import { addFiles, removeAllFiles, removeSpecificFile } from "../store/filesSlice";
 import { RootState } from "../store/store";
-import { Button, Menu, MenuButton, MenuItem, MenuList, Select, MenuItemOption, MenuOptionGroup, List, ListItem, ListIcon, Divider, FormControl, TableContainer, Table, Thead, Tr, Th, Tbody, Td, useBreakpointValue } from "@chakra-ui/react";
+import { Button, Menu, MenuButton, MenuItem, MenuList, Select, MenuItemOption, MenuOptionGroup, List, ListItem, ListIcon, Divider, FormControl, TableContainer, Table, Thead, Tr, Th, Tbody, Td, useBreakpointValue, FormLabel } from "@chakra-ui/react";
 import { ChevronDownIcon, MinusIcon, PlusSquareIcon } from "@chakra-ui/icons";
 import { ALL_METRICS } from "../constants/metrics";
 import { useState } from "react";
@@ -222,10 +222,10 @@ function SubmitFilesBtn() {
 
 
   }
-  return <label className="px-6 md:px-10 lg:px-16 mx-auto flex cursor-pointer hover:bg-slate-600 bg-primary invalid:bg-white valid:bg-black py-3 rounded-2xl">
+  return <FormLabel bgColor={"brand.primary"} textColor={"white"} _hover={{ backgroundColor: "brand.primary-accent" }} mx={"auto"} className="px-6 md:px-10 lg:px-16 mx-auto flex cursor-pointer invalid:bg-white valid:bg-black py-3 rounded-2xl">
     <input type="file" className="absolute bg-transparent" onChange={handleFilesSubmitClick} required style={{ top: "-10000px" }} multiple />
     <span className="mx-auto text-white text-h5">Submit Files</span>
-  </label>
+  </FormLabel>
 }
 
 

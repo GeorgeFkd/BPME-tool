@@ -3,7 +3,7 @@ import React from "react";
 
 function Footer() {
   const orientation = useBreakpointValue({ base: "horizontal", lg: "vertical" }) as "horizontal" | "vertical";
-  return <div className="transparent pt-4 px-4 fixed left-0 bottom-0 w-full h-42 flex flex-col lg:flex-row gap-4 border-t-2 border-black justify-between" >
+  return <div className="transparent pt-4 px-4 w-full h-42 flex flex-col lg:flex-row gap-4 border-t-2 border-black justify-between" >
     <NewsLetter />
     <Divider height="inherit" orientation={orientation} />
     <FindUsOnSocials />
