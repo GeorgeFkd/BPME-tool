@@ -3,7 +3,7 @@ WORKDIR /usr/app
 
 COPY pom.xml .
 RUN ls -l
-RUN apk update && apk add maven
+RUN apk update && apk add maven && apk openjdk17-jre-headless
 RUN mvn clean package
 RUN mvn package
 COPY target/bpme-0.0.1-SNAPSHOT.jar /usr/app/app.jar
