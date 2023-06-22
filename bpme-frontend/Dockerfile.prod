@@ -1,0 +1,10 @@
+FROM node:18-alpine
+
+WORKDIR /usr/app
+COPY package*.json ./
+# could be changed to npm ci
+RUN npm install
+
+COPY . .
+
+RUN npm run build

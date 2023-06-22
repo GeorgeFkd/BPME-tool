@@ -13,6 +13,7 @@ import path from 'path'
 
 export default ({ mode }) => {
   return defineConfig({
+
     plugins: [
       react()
     ],

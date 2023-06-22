@@ -1,0 +1,14 @@
+version: "3"
+services:
+  backend:
+    build:
+      context: ./bpme-backend
+      dockerfile: Dockerfile.prod
+    ports:
+      - "8080:8080"
+  frontend:
+    build:
+      context: ./bpme-frontend
+      dockerfile: Dockerfile.prod
+    depends_on:
+      - backend
