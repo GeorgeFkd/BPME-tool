@@ -1,14 +1,29 @@
 version: "3"
 services:
   backend:
+    container_name: backend
     build:
       context: ./bpme-backend
       dockerfile: Dockerfile.prod
     ports:
       - "8080:8080"
   frontend:
+    container_name: frontend
     build:
       context: ./bpme-frontend
       dockerfile: Dockerfile.prod
     depends_on:
       - backend
+    volumes:
+      - frontend-build:/usr/app/dist
+  apache2:
+    container_name: apache
+    image: httpd:latest
+    depends_on:
+      - frontend
+    ports:
+      - "80:80"
+    volumes:
+      - frontend-build:/usr/local/apache2/htdocs/
+volumes:
+  frontend-build:
