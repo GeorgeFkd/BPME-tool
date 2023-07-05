@@ -6,9 +6,10 @@ import "swiper/css/scrollbar"
 import "../App.css"
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, Scrollbar, A11y, Thumbs } from 'swiper';
-import { Button, useBreakpointValue } from "@chakra-ui/react";
+import { Box, Button, useBreakpointValue } from "@chakra-ui/react";
 import Footer from "../components/Footer";
 import { ArrowForwardIcon } from "@chakra-ui/icons";
+import { Link } from "react-router-dom";
 function Home() {
   const carouselStyle = useBreakpointValue({
     base: {
@@ -78,10 +79,12 @@ function Home() {
 
           </div>
         </div>
-        <div className="flex w-full ">
+        <Box className="flex w-full" mt="2" mb="2" justifySelf={"center"} mx="auto">
 
-          <Button as="a" href="/tool" rightIcon={<ArrowForwardIcon w="8" h="8" />} mt="2" mb="2" width="200px" height="60px" justifySelf={"center"} mx="auto" bgColor={"brand.primary"} textColor={"white"} _hover={{ backgroundColor: "brand.primary-accent" }}>Use the Tool</Button>
-        </div>
+          <Link to="/tool">
+            <Button as="a" href="/tool" rightIcon={<ArrowForwardIcon w="8" h="8" />} width="200px" height="60px" bgColor={"brand.primary"} textColor={"white"} _hover={{ backgroundColor: "brand.primary-accent" }}>Use the Tool</Button>
+          </Link>
+        </Box>
 
       </main >
       <Footer />

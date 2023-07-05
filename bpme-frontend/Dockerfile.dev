@@ -1,7 +1,9 @@
 FROM node:18-alpine
 WORKDIR /usr/app
 COPY package*.json ./
+RUN ls -l 
 RUN npm install
+RUN ls -l node_modules
 COPY . .
-CMD ["npm", "run" , "dev" , "--", "--host"]
+CMD ["npm", "run" , "dev","--","--host"]
 EXPOSE 5173

@@ -10,6 +10,9 @@ services:
     build:
       context: ./bpme-frontend
       dockerfile: Dockerfile.dev
+    volumes:
+      - ./bpme-frontend:/usr/app
+      - /usr/app/node_modules
     ports:
       # not sure about this
       - "5173:5173"
