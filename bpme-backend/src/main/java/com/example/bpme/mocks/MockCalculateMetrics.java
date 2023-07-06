@@ -1,9 +1,9 @@
 package com.example.bpme.mocks;
 
-import com.example.bpme.CalculateMetricsService;
+import com.example.bpme.metrics.CalculateMetricsService;
 import com.example.bpme.records.MetricResults;
 import com.example.bpme.records.MetricResultsOfFile;
-import com.example.bpme.MetricUtils;
+import com.example.bpme.metrics.MetricUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 

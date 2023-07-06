@@ -1,14 +1,11 @@
-package com.example.bpme;
+package com.example.bpme.metrics;
 
-import jdk.swing.interop.SwingInterOpUtils;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.print.DocFlavor;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,7 +16,6 @@ import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -579,10 +575,7 @@ public class MetricUtils {
 
 
     private Document ParseXmlStringToDocument(String xmlString) throws SAXException {
-
-
-//            if(xmlString.isEmpty())throw new XmlFileException.EmptyFileException();
-            InputSource inputSource = new InputSource(new StringReader(xmlString));
+        InputSource inputSource = new InputSource(new StringReader(xmlString));
             try{
                 return domBuilder.parse(inputSource);
             } catch (IOException e){
@@ -592,7 +585,7 @@ public class MetricUtils {
         return null;
     }
 
-    private Optional<ArrayList<Node>> getEventsInDiagram(String xmlString) throws IOException, SAXException {
+    private Optional<ArrayList<Node>> getEventsInDiagram(String xmlString) throws SAXException {
         Document xmlDoc = ParseXmlStringToDocument(xmlString);
         String expression = ".//*";
         try {

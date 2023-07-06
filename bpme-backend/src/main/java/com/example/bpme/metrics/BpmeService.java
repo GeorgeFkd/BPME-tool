@@ -1,17 +1,12 @@
-package com.example.bpme;
+package com.example.bpme.metrics;
 
 import com.example.bpme.records.MetricResults;
 import com.example.bpme.records.MetricResultsOfFile;
 import com.example.bpme.records.StatisticalResults;
 import com.example.bpme.records.StatisticalResultsOfMetric;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 
@@ -40,7 +35,7 @@ import static java.util.List.*;
 @Component("BpmeService")
 public class BpmeService implements CalculateMetricsService, CalculateMetricStatisticsService {
 
-    private MetricUtils metricUtils = new MetricUtils();
+    private final MetricUtils metricUtils = new MetricUtils();
 
     public BpmeService() throws ParserConfigurationException {
     }

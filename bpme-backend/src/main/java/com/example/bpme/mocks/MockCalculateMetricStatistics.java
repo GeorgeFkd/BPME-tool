@@ -1,8 +1,7 @@
 package com.example.bpme.mocks;
 
-import com.example.bpme.CalculateMetricStatisticsService;
-import com.example.bpme.MetricUtils;
-import com.example.bpme.records.MetricResults;
+import com.example.bpme.metrics.CalculateMetricStatisticsService;
+import com.example.bpme.metrics.MetricUtils;
 import com.example.bpme.records.MetricResultsOfFile;
 import com.example.bpme.records.StatisticalResults;
 import com.example.bpme.records.StatisticalResultsOfMetric;

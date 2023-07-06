@@ -1,4 +1,4 @@
-package com.example.bpme;
+package com.example.bpme.metrics;
 
 import com.example.bpme.records.MetricResults;
 import com.example.bpme.records.MetricResultsOfFile;
