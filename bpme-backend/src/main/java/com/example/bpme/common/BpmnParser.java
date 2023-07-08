@@ -166,9 +166,17 @@ public class BpmnParser {
     }
 
     @SneakyThrows
-    public NodeList getAllXmlElementsOfFile(){
+    public ArrayList<Node> getAllXmlElementsOfFile(){
         String expression = "./*";
-        return (NodeList) xpathObj.compile(expression).evaluate(xmlString,XPathConstants.NODESET);
+        NodeList allNodes = (NodeList) xpathObj.compile(expression).evaluate(xmlString,XPathConstants.NODESET);
+        ArrayList<Node> nodes = new ArrayList<>();
+        for(int i = 0; i < allNodes.getLength(); i++){
+            Node current = allNodes.item(i);
+            if(current.getNodeType() == Node.ELEMENT_NODE){
+                nodes.add(current);
+            }
+        }
+        return nodes;
     }
 
     public int getAmountOfIncomingFlowsFromNode(Node node){
@@ -234,15 +242,27 @@ public class BpmnParser {
     }
 
     public ArrayList<Node> getNextNodes(Node n){
-        ArrayList<Node> nextNodes = new ArrayList<>();
+        ArrayList<String> nextNodesSeqFlowsIDs = new ArrayList<>();
         String expression = "./outgoing";
+        ArrayList<Node> nextNodes = new ArrayList<>();
         try {
             NodeList nodeList = (NodeList) xpathObj.compile(expression).evaluate(n,XPathConstants.NODESET);
             for(int i = 0; i< nodeList.getLength(); i++){
                 Node current = nodeList.item(i);
                 if(current.getNodeType() == Node.ELEMENT_NODE && current.getNodeName().endsWith(BPMN_OUTGOING)){
-                    nextNodes.add(current);
+                    String idOfNext = current.getTextContent();
+                    nextNodesSeqFlowsIDs.add(idOfNext);
                 }
+            }
+
+
+            for(String nodeID:nextNodesSeqFlowsIDs){
+                Node seqFlowWithID = (Node) xpathObj.compile("//*[@id='" + nodeID + "']")
+                        .evaluate(xmlDoc,XPathConstants.NODE);
+                String idOfNext = seqFlowWithID.getAttributes().getNamedItem("targetRef").getTextContent();
+                Node nextNode = (Node) xpathObj.compile("//*[@id='" + idOfNext + "']")
+                        .evaluate(xmlDoc,XPathConstants.NODE);
+                nextNodes.add(nextNode);
             }
             return nextNodes;
         } catch (XPathExpressionException e) {
@@ -270,6 +290,25 @@ public class BpmnParser {
             return null;
         }
     }
+
+    public ArrayList<Node> findNodesWithTagName(String tagName){
+        String expression = ".//" + tagName;
+        try {
+            NodeList nodeList = (NodeList) xpathObj.compile(expression).evaluate(xmlDoc,XPathConstants.NODESET);
+            ArrayList<Node> nodes = new ArrayList<>();
+            for(int i = 0; i< nodeList.getLength(); i++){
+                Node current = nodeList.item(i);
+                if(current.getNodeType() == Node.ELEMENT_NODE && getLocalNameFromXmlNodeName(current.getNodeName()).equals(tagName)){
+                    nodes.add(current);
+                }
+            }
+            return nodes;
+        } catch (XPathExpressionException e) {
+            logXPathError(e);
+            return null;
+        }
+    }
+
     public Node findStartNodeOfPrivateProcess(){
         String expressionToFindStartNode = "/definitions/process/startEvent";
         try {

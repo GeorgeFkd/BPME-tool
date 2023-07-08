@@ -1,7 +1,12 @@
 package com.example.bpme.BpmnDags;
 
+import com.example.bpme.BpmnDags.BPVertices.BPElementConsumerFactory;
+import com.example.bpme.BpmnDags.BPVertices.BPElementConsumer;
 import com.example.bpme.common.BpmnParser;
 import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.io.IoCore;
+import org.apache.tinkerpop.gremlin.structure.io.graphml.GraphMLWriter;
 import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -10,10 +15,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 @Service
 @Component("BpmnToDagService")
@@ -52,26 +59,55 @@ public class BpmnToDagService implements BpmnToDagAdapter {
                 String nameOfWhiteBoxProcess = bpmnParser.findNameOfSoleWhiteBoxPool().getAttributes().getNamedItem("name").getTextContent();
                 startNode = bpmnParser.findStartNode(nameOfWhiteBoxProcess);
             }
-            Stack<Node> toVisit = new Stack<>();
-            toVisit.push(startNode);
-            while(!toVisit.isEmpty()){
-                Node currentNode = toVisit.pop();
-                ArrayList<Node> nextNodes = convertNodeListToArray(bpmnParser.findNextNodes(currentNode));
+            System.out.println("Converting diagram to graphml");
+            System.out.println("Start node of: " + bpmnFile.getFilename() + " is: " + bpmnParser.findStartNode(null).getTextContent());
+            //For simple scenarios this works
+            LinkedList<Node> toVisitQueue = new LinkedList<>();
+            ArrayList<Node> visitedNodes = new ArrayList<>();
+            LinkedList<Vertex> toVisitVertices = new LinkedList<>();
+            toVisitQueue.offer(startNode);
+            BPElementConsumer startElConsumer =  BPElementConsumerFactory.createFromNode(startNode,bpmnParser);
+            Vertex startVertex = startElConsumer.addToGraphWithPrev(graph,null);
+            toVisitVertices.offer(startVertex);
+
+            while(!toVisitQueue.isEmpty()){
+                Node currentNode = toVisitQueue.pop();
+                Vertex prevVertex = toVisitVertices.pop();
+                visitedNodes.add(currentNode);
+                ArrayList<Node> nextNodes = bpmnParser.getNextNodes(currentNode);
                 for(Node nextNode:nextNodes){
-                    toVisit.push(nextNode);
+                    toVisitQueue.offer(nextNode);
+                    BPElementConsumer nextVertex = BPElementConsumerFactory.createFromNode(nextNode,bpmnParser);
+                    Vertex v = nextVertex.addToGraphWithPrev(graph,prevVertex);
+                    toVisitVertices.offer(v);
                 }
             }
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+// Create a GraphMLWriter instance
+            GraphMLWriter writer = GraphMLWriter.build().create();
+
+// Write the graph to GraphML format
+            writer.writeGraph(outputStream, graph);
+
+// Convert the ByteArrayOutputStream to a string using the specified character encoding
+            String graphmlString = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+            System.out.println(graphmlString);
             //Now we can do the iteration starting from this node
 
 //            System.out.println("These are the contents of the file: " + contentsOfFile);
-            System.out.println("Converting diagram to graphml");
-            System.out.println("Start node of: " + bpmnFile.getFilename() + " is: " + bpmnParser.findStartNode(null).getTextContent());
+
+
         } catch (Exception e) {
             System.out.println("======================");
             System.out.println(e.getCause()+" " + e.getLocalizedMessage());
         }
 
         return null;
+    }
+
+    private void addGraphNodesFromBpmnElement(Graph g,Node n){
+
     }
     
 }
