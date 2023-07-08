@@ -1,4 +1,4 @@
-package com.example.bpme;
+package com.example.bpme.common;
 
 
 import lombok.extern.slf4j.Slf4j;

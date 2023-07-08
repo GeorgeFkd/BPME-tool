@@ -1,4 +1,6 @@
-package com.example.bpme.records;
+package com.example.bpme.metrics.records;
+
+import com.example.bpme.metrics.records.MetricResults;
 
 import java.util.ArrayList;
 import java.util.Objects;

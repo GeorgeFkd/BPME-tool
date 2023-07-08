@@ -1,6 +1,6 @@
-package com.example.bpme.records;
+package com.example.bpme.metrics.records;
 
-import com.example.bpme.records.StatisticalResults;
+import com.example.bpme.metrics.records.StatisticalResults;
 
 import java.util.Objects;
 

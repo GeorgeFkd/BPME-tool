@@ -1,5 +1,6 @@
 package com.example.bpme.common;
 
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
@@ -19,19 +20,22 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 import java.util.function.Predicate;
+@Getter
 @Slf4j
-public class BpmnFileUtils {
+public class BpmnParser {
 
 
     private static final String BPMN_INCOMING = "incoming";
     private static final String BPMN_OUTGOING = "outgoing";
     private static final String BPMN_GATEWAY_POSTFIX = "Gateway";
     private static final String BPMN_EVENTS_POSTFIX = "Event";
+    private static final String BPMN_START_EVENT_PREFIX = "start";
     private static final String BPMN_SEQUENCE_FLOW = "sequenceFlow";
     private final String xmlString;
     private final Document xmlDoc;
     private final DocumentBuilder domBuilder;
     private final XPath xpathObj;
+    private final String filename;
     public Optional<ArrayList<Node>> getAllSequenceFlowsArr() {
         String sequenceFlowsExpression = "/definitions//*/*";
         try {
@@ -44,21 +48,22 @@ public class BpmnFileUtils {
         }
     }
 
-    public BpmnFileUtils(String xmlString) throws ParserConfigurationException, SAXException {
+    public BpmnParser(String xmlString,String filename) throws ParserConfigurationException, SAXException {
         this.xmlString = xmlString;
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         this.domBuilder = builderFactory.newDocumentBuilder();
         this.xpathObj = XPathFactory.newInstance().newXPath();
         this.xmlDoc = parseXmlStringToDocument(xmlString);
+        this.filename = filename;
     }
-    private String getLocalNameFromXmlNodeName(String nodeName){
+    public String getLocalNameFromXmlNodeName(String nodeName){
         String[] splitLocalNameFromNamespace = nodeName.split(":");
         if(splitLocalNameFromNamespace.length < 2 ){
             return splitLocalNameFromNamespace[0];
         }
         return splitLocalNameFromNamespace[1];
     }
-    private ArrayList<Node> getNodesWithLocalNameThatPassesPredicate(NodeList nodeList, Predicate<String> predicate){
+    public ArrayList<Node> getNodesWithLocalNameThatPassesPredicate(NodeList nodeList, Predicate<String> predicate){
         ArrayList<Node> nodesThatMatchPredicate = new ArrayList<>();
 
         for(int i = 0; i < nodeList.getLength(); i++){
@@ -177,6 +182,19 @@ public class BpmnFileUtils {
             return 0;
         }
     }
+    public Optional<NodeList> getAllSequenceFlows() {
+        String sequenceFlowsExpression = "/definitions//*/sequenceFlow";
+
+        NodeList sequenceFlowsNodeList = null;
+        try {
+            sequenceFlowsNodeList = (NodeList) this.xpathObj.compile(sequenceFlowsExpression).evaluate(xmlDoc, XPathConstants.NODESET);
+            return Optional.of(sequenceFlowsNodeList);
+        } catch (XPathExpressionException e) {
+            System.out.println(e);
+            System.out.println("all sfs list " + e.getCause() + "--" + e.getMessage());
+            return Optional.empty();
+        }
+    }
 
     private void logXPathError(XPathExpressionException e){
         log.error("Error in XPath: " + e.getCause() + e.getLocalizedMessage());
@@ -204,4 +222,94 @@ public class BpmnFileUtils {
             return Optional.empty();
         }
     }
+    public Optional<ArrayList<Node>> getAllActivitiesOfCompleteModel() {
+        try {
+            NodeList allNodes = (NodeList) xpathObj.compile(".//*").evaluate(xmlDoc,XPathConstants.NODESET);
+            ArrayList<Node> allActivities = getNodesWithLocalNameThatPassesPredicate(allNodes,(localName)->localName.matches(".*(t|T)ask"));
+            return Optional.of(allActivities);
+        } catch (XPathExpressionException e) {
+            logXPathError(e);
+            return Optional.empty();
+        }
+    }
+
+    public ArrayList<Node> getNextNodes(Node n){
+        ArrayList<Node> nextNodes = new ArrayList<>();
+        String expression = "./outgoing";
+        try {
+            NodeList nodeList = (NodeList) xpathObj.compile(expression).evaluate(n,XPathConstants.NODESET);
+            for(int i = 0; i< nodeList.getLength(); i++){
+                Node current = nodeList.item(i);
+                if(current.getNodeType() == Node.ELEMENT_NODE && current.getNodeName().endsWith(BPMN_OUTGOING)){
+                    nextNodes.add(current);
+                }
+            }
+            return nextNodes;
+        } catch (XPathExpressionException e) {
+            logXPathError(e);
+            return nextNodes;
+        }
+    }
+
+    public Node findStartNode(String participant){
+        if(participant == null) return findStartNodeOfPrivateProcess();
+        else return findStartNodeOfParticipant(participant);
+    }
+
+    public Node findStartNodeOfParticipant(String participant){
+        String expressionToFindParticipant = "/definitions/collaboration/participant[@name='" + participant + "']";
+        try {
+            Node participantNode = (Node) xpathObj.compile(expressionToFindParticipant).evaluate(xmlDoc,XPathConstants.NODE);
+            String participantProcessId = participantNode.getAttributes().getNamedItem("processRef").getNodeValue();
+            String expressionToFindProcessOfParticipant = "/definitions/process[@id='" + participantProcessId + "']" + "/startEvent";
+            Node startEventOfProcessOfParticipant = (Node) xpathObj.compile(expressionToFindProcessOfParticipant).evaluate(xmlDoc,XPathConstants.NODE);
+            return startEventOfProcessOfParticipant;
+
+        } catch (XPathExpressionException e) {
+            logXPathError(e);
+            return null;
+        }
+    }
+    public Node findStartNodeOfPrivateProcess(){
+        String expressionToFindStartNode = "/definitions/process/startEvent";
+        try {
+            Node startEvent = (Node) xpathObj.compile(expressionToFindStartNode).evaluate(xmlDoc,XPathConstants.NODE);
+            return startEvent;
+        } catch (XPathExpressionException e) {
+            logXPathError(e);
+            return null;
+        }
+    }
+
+    public NodeList getParticipantsOfCollaboration(){
+        String expression = "/definitions/collaboration/participant";
+        try {
+            NodeList participants = (NodeList) xpathObj.compile(expression).evaluate(xmlDoc,XPathConstants.NODESET);
+            return participants;
+        } catch (XPathExpressionException e) {
+            logXPathError(e);
+            return null;
+        }
+    }
+
+    public Node findNameOfSoleWhiteBoxPool(){
+        NodeList participants = getParticipantsOfCollaboration();
+        if(participants.getLength() == 1){
+            Node participant = participants.item(0);
+            return participant.getAttributes().getNamedItem("name");
+        }else if(participants.getLength() > 1) {
+            log.info("More than one participant found in collaboration. This is not supported yet.");
+            for(int i = 0; i < participants.getLength(); i++){
+                Node participant = participants.item(i);
+                if(participant.getAttributes().getNamedItem("processRef")!=null){
+                    return participant.getAttributes().getNamedItem("name");
+                }
+            }
+            return null;
+        }
+        else return null;
+    }
+
+
+
 }

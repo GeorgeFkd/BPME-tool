@@ -1,9 +1,11 @@
-package com.example.bpme;
+package com.example.bpme.metrics;
 
 
 import com.example.bpme.metrics.CalculateMetricStatisticsService;
 import com.example.bpme.metrics.CalculateMetricsService;
-import com.example.bpme.records.*;
+import com.example.bpme.metrics.records.AnalysisResults;
+import com.example.bpme.metrics.records.MetricResultsOfFile;
+import com.example.bpme.metrics.records.StatisticalResultsOfMetric;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,7 +20,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,21 +39,22 @@ public class BpmeController {
 
 
     @PostMapping(path ="/files")
-    public ResponseEntity<AnalysisResults> analyzeFiles(@RequestParam("files") MultipartFile[] filesArray,@RequestParam("metrics") ArrayList<String> metricsToInclude)  {
+    public ResponseEntity<AnalysisResults> analyzeFiles(@RequestParam("files") MultipartFile[] filesArray, @RequestParam("metrics") ArrayList<String> metricsToInclude) throws XmlFileException {
         List<Resource> resourceList = Arrays.stream(filesArray).map(MultipartFile::getResource).collect(Collectors.toList());
-
-        try{
             List<MetricResultsOfFile> metricResults = this.calculateMetricsApi.calculateMetricsForFiles(resourceList,metricsToInclude);
             List<StatisticalResultsOfMetric> statisticalResultsOfMetrics = this.calculateMetricStatisticsApi.calculateStatisticsForMetricValues(metricResults,metricsToInclude);
             AnalysisResults analysisResults = new AnalysisResults(metricResults,statisticalResultsOfMetrics);
             return new ResponseEntity<>(analysisResults,HttpStatus.OK);
-        }catch (ParserConfigurationException | IOException | SAXException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }catch (NotImplementedException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-        }
-
+    }
+    @ExceptionHandler({XmlFileException.class})
+    public ResponseEntity<InformationForXmlFileException>handleXmlFileProblem(XmlFileException e){
+        InformationForXmlFileException info = new InformationForXmlFileException(e.getFilename(),e.getExceptionMessage(),"This file you uploaded is not a valid xml file","Please upload a valid xml file");
+        return new ResponseEntity<>(info,HttpStatus.BAD_REQUEST);
+    }
+    private record InformationForXmlFileException(String filename,String exceptionMessage,String forUserWhatHappenedMessage,String forUserHowToFixMessage){
 
     }
+
+
 
 }

@@ -1,4 +1,4 @@
-package com.example.bpme.records;
+package com.example.bpme.metrics.records;
 
 import java.util.Objects;
 

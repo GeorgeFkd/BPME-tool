@@ -1,9 +1,8 @@
 package com.example.bpme.mocks;
 
 import com.example.bpme.metrics.CalculateMetricsService;
-import com.example.bpme.records.MetricResults;
-import com.example.bpme.records.MetricResultsOfFile;
-import com.example.bpme.metrics.MetricUtils;
+import com.example.bpme.metrics.records.MetricResults;
+import com.example.bpme.metrics.records.MetricResultsOfFile;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +16,7 @@ public class MockCalculateMetrics implements CalculateMetricsService {
         for(Resource file : fileList){
             ArrayList<MetricResults> metricResults = new ArrayList<>();
             String filename = file.getFilename();
-            for(String metric: MetricUtils.supportedMetrics){
+            for(String metric: new String[]{"AGD","CFC"}){
                 metricResults.add(new MetricResults(metric, (int) 1 + Math.random() * 15 ));
             }
             totalResults.add(new MetricResultsOfFile(filename,metricResults));

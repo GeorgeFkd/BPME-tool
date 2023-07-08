@@ -1,8 +1,7 @@
 package com.example.bpme.metrics;
 
-import com.example.bpme.records.MetricResults;
-import com.example.bpme.records.MetricResultsOfFile;
-import com.example.bpme.records.StatisticalResultsOfMetric;
+import com.example.bpme.metrics.records.MetricResultsOfFile;
+import com.example.bpme.metrics.records.StatisticalResultsOfMetric;
 
 import java.util.ArrayList;
 import java.util.List;
